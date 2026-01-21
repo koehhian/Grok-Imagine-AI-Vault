@@ -231,104 +231,106 @@ export default function App() {
     }, [links, search, albumFilter]);
 
     return (
-        <div className="min-h-screen bg-black text-white p-8 font-sans">
+        <div className="min-h-screen bg-black text-white px-8 font-sans">
             <div className="max-w-7xl mx-auto">
+                <div className="sticky top-0 z-[60] bg-black/95 backdrop-blur-md pt-8 pb-4 mb-4 border-b border-zinc-800/50">
 
 
-                {/* Header */}
-                <header className="flex flex-col md:flex-row justify-between items-center mb-12 gap-6">
-                    <motion.div
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                    >
-                        <h1 className="text-4xl font-bold tracking-tight text-white">
-                            Grok Imagine AI Vault
-                        </h1>
-                        <p className="text-zinc-500 mt-2 font-medium">優雅地保存與管理你的 Grok 創作</p>
-                    </motion.div>
+                    {/* Header */}
+                    <header className="flex flex-col md:flex-row justify-between items-center mb-12 gap-6">
+                        <motion.div
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                        >
+                            <h1 className="text-4xl font-bold tracking-tight text-white">
+                                Grok Imagine AI Vault
+                            </h1>
+                            <p className="text-zinc-500 mt-2 font-medium">優雅地保存與管理你的 Grok 創作</p>
+                        </motion.div>
 
-                    {/* Search & Add Bar */}
-                    <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto">
-                        <div className="relative group">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 group-focus-within:text-blue-400 transition-colors" />
-                            <input
-                                type="text"
-                                placeholder="搜尋連結或標題..."
-                                className="pl-10 pr-4 py-3 bg-zinc-900 border border-zinc-800 rounded-xl focus:outline-none focus:ring-1 focus:ring-zinc-700 w-full md:w-64 transition-all placeholder:text-zinc-600"
-                                value={search}
-                                onChange={(e) => setSearch(e.target.value)}
-                            />
-                        </div>
-
-                        <div className="flex flex-col gap-2">
-                            <div className="flex gap-2">
-                                <textarea
-                                    placeholder="一次貼上多行連結..."
-                                    className="px-4 py-3 bg-zinc-900 border border-zinc-800 rounded-xl focus:outline-none focus:ring-1 focus:ring-zinc-700 flex-1 min-h-[46px] resize-y placeholder:text-zinc-600"
-                                    rows="1"
-                                    value={newUrl}
-                                    onChange={(e) => setNewUrl(e.target.value)}
-                                    onKeyDown={(e) => {
-                                        if (e.key === 'Enter' && !e.shiftKey) {
-                                            e.preventDefault();
-                                            addLink(e);
-                                        }
-                                    }}
-                                />
+                        {/* Search & Add Bar */}
+                        <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto">
+                            <div className="relative group">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 group-focus-within:text-blue-400 transition-colors" />
                                 <input
                                     type="text"
-                                    placeholder="專輯名稱"
-                                    className="px-4 py-3 bg-zinc-900 border border-zinc-800 rounded-xl focus:outline-none focus:ring-1 focus:ring-zinc-700 w-40 placeholder:text-zinc-600"
-                                    value={newAlbum}
-                                    onChange={(e) => setNewAlbum(e.target.value)}
+                                    placeholder="搜尋連結或標題..."
+                                    className="pl-10 pr-4 py-3 bg-zinc-900 border border-zinc-800 rounded-xl focus:outline-none focus:ring-1 focus:ring-zinc-700 w-full md:w-64 transition-all placeholder:text-zinc-600"
+                                    value={search}
+                                    onChange={(e) => setSearch(e.target.value)}
                                 />
                             </div>
-                            <button
-                                disabled={loading}
-                                className="px-6 py-3 bg-white hover:bg-zinc-200 text-black font-bold rounded-xl active:scale-95 transition-all flex items-center justify-center gap-2"
-                                onClick={addLink}
-                            >
-                                {loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
-                                <span>批量加入</span>
-                            </button>
-                        </div>
 
-                        {/* Blur Toggle (iOS Style) */}
-                        <div className="flex items-center gap-3 bg-slate-800/30 px-4 py-2 rounded-2xl border border-slate-700/30 glass">
-                            <span className="text-sm font-medium text-slate-400">隱私模糊</span>
+                            <div className="flex flex-col gap-2">
+                                <div className="flex gap-2">
+                                    <textarea
+                                        placeholder="一次貼上多行連結..."
+                                        className="px-4 py-3 bg-zinc-900 border border-zinc-800 rounded-xl focus:outline-none focus:ring-1 focus:ring-zinc-700 flex-1 min-h-[46px] resize-y placeholder:text-zinc-600"
+                                        rows="1"
+                                        value={newUrl}
+                                        onChange={(e) => setNewUrl(e.target.value)}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter' && !e.shiftKey) {
+                                                e.preventDefault();
+                                                addLink(e);
+                                            }
+                                        }}
+                                    />
+                                    <input
+                                        type="text"
+                                        placeholder="專輯名稱"
+                                        className="px-4 py-3 bg-zinc-900 border border-zinc-800 rounded-xl focus:outline-none focus:ring-1 focus:ring-zinc-700 w-40 placeholder:text-zinc-600"
+                                        value={newAlbum}
+                                        onChange={(e) => setNewAlbum(e.target.value)}
+                                    />
+                                </div>
+                                <button
+                                    disabled={loading}
+                                    className="px-6 py-3 bg-white hover:bg-zinc-200 text-black font-bold rounded-xl active:scale-95 transition-all flex items-center justify-center gap-2"
+                                    onClick={addLink}
+                                >
+                                    {loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+                                    <span>批量加入</span>
+                                </button>
+                            </div>
+
+                            {/* Blur Toggle (iOS Style) */}
+                            <div className="flex items-center gap-3 bg-slate-800/30 px-4 py-2 rounded-2xl border border-slate-700/30 glass">
+                                <span className="text-sm font-medium text-slate-400">隱私模糊</span>
+                                <button
+                                    onClick={() => setIsBlurred(!isBlurred)}
+                                    className={cn(
+                                        "relative w-11 h-6 rounded-full transition-colors duration-200 focus:outline-none",
+                                        isBlurred ? "bg-emerald-500" : "bg-slate-600"
+                                    )}
+                                >
+                                    <motion.div
+                                        animate={{ x: isBlurred ? 22 : 2 }}
+                                        transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                                        className="absolute top-1 left-0 w-4 h-4 bg-white rounded-full shadow-sm"
+                                    />
+                                </button>
+                            </div>
+                        </div>
+                    </header>
+
+                    {/* Album Filter Bar */}
+                    <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
+                        {albums.map(album => (
                             <button
-                                onClick={() => setIsBlurred(!isBlurred)}
+                                key={album}
+                                onClick={() => setAlbumFilter(album)}
                                 className={cn(
-                                    "relative w-11 h-6 rounded-full transition-colors duration-200 focus:outline-none",
-                                    isBlurred ? "bg-emerald-500" : "bg-slate-600"
+                                    "px-4 py-1.5 rounded-full text-sm font-medium transition-all whitespace-nowrap",
+                                    albumFilter === album
+                                        ? "bg-white text-black shadow-lg"
+                                        : "bg-zinc-900 text-zinc-400 border border-zinc-800 hover:bg-zinc-800"
                                 )}
                             >
-                                <motion.div
-                                    animate={{ x: isBlurred ? 22 : 2 }}
-                                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                                    className="absolute top-1 left-0 w-4 h-4 bg-white rounded-full shadow-sm"
-                                />
+                                {album === 'ALL' ? '全部產品' : album}
                             </button>
-                        </div>
+                        ))}
                     </div>
-                </header>
-
-                {/* Album Filter Bar */}
-                <div className="flex items-center gap-2 mb-8 overflow-x-auto pb-2 scrollbar-hide">
-                    {albums.map(album => (
-                        <button
-                            key={album}
-                            onClick={() => setAlbumFilter(album)}
-                            className={cn(
-                                "px-4 py-1.5 rounded-full text-sm font-medium transition-all whitespace-nowrap",
-                                albumFilter === album
-                                    ? "bg-white text-black shadow-lg"
-                                    : "bg-zinc-900 text-zinc-400 border border-zinc-800 hover:bg-zinc-800"
-                            )}
-                        >
-                            {album === 'ALL' ? '全部產品' : album}
-                        </button>
-                    ))}
                 </div>
 
                 {/* Gallery Grid Container with Selection Logic */}

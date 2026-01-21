@@ -78,11 +78,16 @@ app.post('/api/links/bulk', (req, res) => {
             if (isDup) console.log(`[Bulk Add] Skipping duplicate: ${link.url}`);
             return !isDup;
         })
-        .map(link => {
+        .map((link, index) => {
             const thumbnail = getGrokThumbnail(link.url);
-            if (thumbnail) console.log(`[Bulk Add] Auto-generated Grok thumbnail: ${thumbnail}`);
+            const id = `${Date.now()}.${index}.${Math.floor(Math.random() * 10000)}`;
+            if (thumbnail) {
+                console.log(`[Bulk Add] Auto-generated thumbnail for index ${index}: ${thumbnail}`);
+            } else {
+                console.log(`[Bulk Add] No thumbnail pattern found for: ${link.url}`);
+            }
             return {
-                id: (Date.now() + Math.random()).toString(),
+                id,
                 url: link.url,
                 title: link.title || 'Untitled AI Image',
                 thumbnail,
