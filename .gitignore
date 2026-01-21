@@ -1,0 +1,7 @@
+node_modules
+.DS_Store
+dist
+.env
+data/*.json
+!data/links_template.json
+package-lock.json
