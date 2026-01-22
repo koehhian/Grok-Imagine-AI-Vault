@@ -12,6 +12,18 @@
 
 An elegant repository for managing and organizing your AI-generated images, specifically optimized for Grok.
 
+## 💎 Advanced Tool: Grok Link Detector
+
+To efficiently capture links from `grok.com/imagine`:
+
+1.  **Install Tampermonkey**: A browser extension for userscripts.
+2.  **Add Script**: Create a new script and paste the content of [`grok-detector.js`](grok-detector.js).
+3.  **Capture**: Scroll through Grok's gallery; the detector will automatically capture links.
+4.  **Sync**: Click **"Copy for Vault"** and then use the **"Import"** function in your AI Vault.
+
+---
+🚀 Happy Archiving!
+
 ## Features
 
 - **Automated Thumbnail Generation**: Automatically derives thumbnail URLs for Grok post links.
