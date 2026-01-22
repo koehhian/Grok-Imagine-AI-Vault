@@ -13,7 +13,7 @@ const PORT = 3002;
 const DATA_FILE = path.join(__dirname, 'data', 'links.json');
 
 app.use(cors());
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: '50mb' }));
 
 if (!fs.existsSync(path.join(__dirname, 'data'))) {
     fs.mkdirSync(path.join(__dirname, 'data'));
@@ -33,31 +33,57 @@ const getGrokThumbnail = (url) => {
     return null;
 };
 
+// Data Migration: Album (String) -> Tags (Array)
+const migrateData = () => {
+    let raw = fs.readFileSync(DATA_FILE, 'utf8');
+    let data = JSON.parse(raw);
+    let changed = false;
+
+    data = data.map(link => {
+        // If has album but no tags array, migrate
+        if (link.album && !Array.isArray(link.tags)) {
+            link.tags = [link.album];
+            delete link.album;
+            changed = true;
+        }
+        // Ensure tags exists as an array
+        if (!link.tags) {
+            link.tags = [];
+            changed = true;
+        }
+        return link;
+    });
+
+    if (changed) {
+        console.log("[Migration] Converted 'album' strings to 'tags' arrays.");
+        fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
+    }
+};
+migrateData();
+
 app.get('/api/links', (req, res) => {
     const data = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
     res.json(data);
 });
 
 app.post('/api/links', (req, res) => {
-    const { url, title } = req.body;
+    const { url, title, tags } = req.body;
     if (!url) return res.status(400).json({ error: 'URL is required' });
 
     const data = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
 
     // Deduplication check
     if (data.some(link => link.url === url)) {
-        console.log(`[Add Link] Duplicate URL skipped: ${url}`);
         return res.status(409).json({ error: 'URL already exists' });
     }
 
     const thumbnail = getGrokThumbnail(url);
-    if (thumbnail) console.log(`[Add Link] Auto-generated thumbnail for Grok link: ${thumbnail}`);
-
     const newLink = {
         id: Date.now().toString(),
         url,
         title: title || 'Untitled AI Image',
         thumbnail,
+        tags: Array.isArray(tags) ? tags : [],
         addedAt: new Date().toISOString()
     };
     data.push(newLink);
@@ -66,11 +92,13 @@ app.post('/api/links', (req, res) => {
 });
 
 app.post('/api/links/bulk', (req, res) => {
-    const { links, album } = req.body;
+    const { links, tags } = req.body;
     if (!Array.isArray(links)) return res.status(400).json({ error: 'Array of links required' });
 
     const data = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
     const existingUrls = new Set(data.map(l => l.url));
+
+    const finalTags = Array.isArray(tags) ? tags : [];
 
     const newLinks = links
         .filter(link => {
@@ -81,17 +109,12 @@ app.post('/api/links/bulk', (req, res) => {
         .map((link, index) => {
             const thumbnail = getGrokThumbnail(link.url);
             const id = `${Date.now()}.${index}.${Math.floor(Math.random() * 10000)}`;
-            if (thumbnail) {
-                console.log(`[Bulk Add] Auto-generated thumbnail for index ${index}: ${thumbnail}`);
-            } else {
-                console.log(`[Bulk Add] No thumbnail pattern found for: ${link.url}`);
-            }
             return {
                 id,
                 url: link.url,
                 title: link.title || 'Untitled AI Image',
                 thumbnail,
-                album: album || '未分類',
+                tags: finalTags.length > 0 ? finalTags : ['Uncategorized'],
                 addedAt: new Date().toISOString()
             };
         });
@@ -137,7 +160,7 @@ app.post('/api/links/bulk-delete', (req, res) => {
     res.json({ success: true });
 });
 
-// Bulk Update (e.g., Change album)
+// Bulk Update (e.g., Change tags)
 app.post('/api/links/bulk-patch', (req, res) => {
     const { ids, updates } = req.body;
     if (!Array.isArray(ids)) return res.status(400).json({ error: 'Array of ids required' });
@@ -152,6 +175,68 @@ app.post('/api/links/bulk-patch', (req, res) => {
 
     fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
     res.json({ success: true });
+});
+
+// Export Data
+app.get('/api/links/export', (req, res) => {
+    res.download(DATA_FILE, 'grok-vault-backup.json');
+});
+
+// Import Data
+app.post('/api/links/import', (req, res) => {
+    const { data } = req.body;
+    if (!Array.isArray(data)) return res.status(400).json({ error: 'Valid links array required' });
+
+    // Simple validation
+    const isValid = data.every(item => item.url && item.id);
+    if (!isValid) return res.status(400).json({ error: 'Invalid data format' });
+
+    fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
+    res.json({ success: true, count: data.length });
+});
+
+// Global Tag Rename
+app.post('/api/tags/rename', (req, res) => {
+    const { oldTag, newTag } = req.body;
+    if (!oldTag || !newTag) return res.status(400).json({ error: 'Old and new tag names required' });
+
+    let data = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
+    let changed = false;
+    data = data.map(link => {
+        if (link.tags && link.tags.includes(oldTag)) {
+            link.tags = link.tags.map(t => t === oldTag ? newTag : t);
+            // Remove duplicates if newTag already exists in the array
+            link.tags = Array.from(new Set(link.tags));
+            changed = true;
+        }
+        return link;
+    });
+
+    if (changed) {
+        fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
+    }
+    res.json({ success: true, changed });
+});
+
+// Global Tag Delete
+app.post('/api/tags/delete', (req, res) => {
+    const { tag } = req.body;
+    if (!tag) return res.status(400).json({ error: 'Tag name required' });
+
+    let data = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
+    let changed = false;
+    data = data.map(link => {
+        if (link.tags && link.tags.includes(tag)) {
+            link.tags = link.tags.filter(t => t !== tag);
+            changed = true;
+        }
+        return link;
+    });
+
+    if (changed) {
+        fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
+    }
+    res.json({ success: true, changed });
 });
 
 

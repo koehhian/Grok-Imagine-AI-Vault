@@ -1,21 +1,46 @@
+<div align="center">
+  <img src="public/logo.png" alt="Grok Imagine AI Vault Logo" width="120" />
+</div>
+
 # Grok Imagine AI Vault
+
+**English** | [繁體中文](README_zh-TW.md) | [简体中文](README_zh-CN.md) | [日本語](README_ja.md)
+
+<div align="center">
+  <img src="public/preview.png" alt="App Preview" width="100%" style="border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);" />
+</div>
 
 An elegant repository for managing and organizing your AI-generated images, specifically optimized for Grok.
 
 ## Features
 
 - **Automated Thumbnail Generation**: Automatically derives thumbnail URLs for Grok post links.
+- **Data Portability**: Easily Export and Import your entire vault data (JSON) for simple device switching.
+- **Multi-Tag System**: Organize images with multiple categories; filter by tags with a "More Tags" dropdown.
 - **Smart Deduplication**: Prevents duplicate links from being added to your vault.
 - **Grok-Style UI**: A minimal, high-contrast dark mode aesthetic.
-- **Batch Operations**: Support for multi-selection, bulk deletion, and album organization.
+- **Batch Operations**: Support for easy multi-selection, bulk deletion, and tag organization.
 - **Privacy First**: Built-in privacy blur toggle for discrete browsing.
-- **Search & Filter**: Quickly find your images by title, URL, or album.
+- **Search & Filter**: Quickly find your images by title, URL, or tags.
+
+## Usage Tips
+
+### Grok Thumbnails
+For the best experience with Grok Imagine links:
+> [!IMPORTANT]
+> **Static Image Requirement**: When copying a public post link from Grok, ensure you are viewing a **static image**. If you copy a link while the image is still generating or in a dynamic view, the thumbnail derivation may fail.
+
+### Batch Upload
+You can paste multiple links (one per line) in the bulk add field. You can also specify tags for the entire batch at once.
+
+### Export/Import
+Use the **Export** ![export](assets/export.png) and **Import** ![import](assets/import.png) buttons in the header to backup your data or transfer it to another Vault instance.
 
 ## Tech Stack
 
 - **Frontend**: React, TailwindCSS, Framer Motion, Lucide Icons.
 - **Backend**: Node.js, Express.
-- **Storage**: JSON-based flat file system.
+- **Storage**: JSON-based flat file system (`data/links.json`).
 
 ## Getting Started
 
@@ -30,6 +55,11 @@ An elegant repository for managing and organizing your AI-generated images, spec
    ```
 4. Open [http://localhost:5179](http://localhost:5179) in your browser.
 
-## Contributing
+## License
 
-Feel free to open issues or submit pull requests to improve the features or UI.
+This project is licensed under the **GNU GPL v3**. See the [LICENSE](https://www.gnu.org/licenses/gpl-3.0.html) for details.
+
+## Buy Me a Coffee
+
+If you find this tool helpful and want to support its development, feel free to buy me a coffee!
+[Donation link](https://buymeacoffee.com/koehhian)

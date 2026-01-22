@@ -4,4 +4,4 @@ dist
 .env
 data/*.json
 !data/links_template.json
-package-lock.json
+server.log
