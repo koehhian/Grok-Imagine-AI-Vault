@@ -26,14 +26,15 @@ To efficiently capture links from `grok.com/imagine`:
 
 ## Features
 
-- **Automated Thumbnail Generation**: Automatically derives thumbnail URLs for Grok post links.
+- **Comprehensive Grok Link Support**: Support for `post`, `video`, `share`, and direct `imagine-public` image links.
+- **Auto-Thumbnail & UUID Extraction**: Automatically extracts UUIDs from various Grok link formats to generate .jpg thumbnails.
+- **CDN-to-Post Magic**: Dragging a Grok CDN image link automatically converts it to a canonical Grok post URL while keeping the image as a high-quality thumbnail.
+- **Robust Drag-and-Drop**: Intelligent filtering of Base64 data and improved compatibility across different browsers and drop sources.
 - **Data Portability**: Easily Export and Import your entire vault data (JSON) for simple device switching.
-- **Multi-Tag System**: Organize images with multiple categories; filter by tags with a "More Tags" dropdown.
-- **Smart Deduplication**: Prevents duplicate links from being added to your vault.
-- **Grok-Style UI**: A minimal, high-contrast dark mode aesthetic.
-- **Batch Operations**: Support for easy multi-selection, bulk deletion, and tag organization.
+- **Multi-Tag System**: Organize images with multiple categories; filter by tags with a custom dropdown.
+- **Grok-Style UI**: A minimal, high-contrast dark mode aesthetic with a **Sticky Header** for easy navigation.
+- **Batch Operations**: Support for multi-selection, bulk deletion, and tag organization. Bulk add supports newlines, commas, and spaces.
 - **Privacy First**: Built-in privacy blur toggle for discrete browsing.
-- **Search & Filter**: Quickly find your images by title, URL, or tags.
 
 ## Usage Tips
 
@@ -49,7 +50,7 @@ Currently, videos (including image links that have already been made into videos
 3. Drag the preview image back to the **Grok Imagine AI Vault** card to add the thumbnail.
 
 ### Batch Upload
-You can paste multiple links (one per line) in the bulk add field. You can also specify tags for the entire batch at once.
+You can paste multiple links in the bulk add field. It supports separators like **newlines**, **commas**, or **spaces**. You can also specify tags for the entire batch at once.
 
 ### Export/Import
 Use the **Export** ![export](assets/export.png) and **Import** ![import](assets/import.png) buttons in the header to backup your data or transfer it to another Vault instance.

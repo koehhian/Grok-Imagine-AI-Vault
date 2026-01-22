@@ -19,14 +19,16 @@ const IS_DEMO = typeof window !== 'undefined' && (
 
 // Mock Data for Demo
 const DEMO_INITIAL_DATA = [
-    { id: 'new_demo_1', url: 'https://grok.com/imagine/post/71b92624-fa37-4fc1-a374-0078fd30b8b7', title: 'Demo Image 1', thumbnail: 'https://imagine-public.x.ai/imagine-public/images/71b92624-fa37-4fc1-a374-0078fd30b8b7.jpg', tags: ['Demo', 'New'], addedAt: new Date().toISOString() },
-    { id: 'new_demo_2', url: 'https://grok.com/imagine/post/7a1a30d2-4256-4571-9364-2e7afbc5d027', title: 'Demo Image 2', thumbnail: 'https://imagine-public.x.ai/imagine-public/images/7a1a30d2-4256-4571-9364-2e7afbc5d027.jpg', tags: ['Demo'], addedAt: new Date(Date.now() - 1000).toISOString() },
-    { id: 'new_demo_3', url: 'https://grok.com/imagine/post/1b5c753c-2d25-4710-baa0-2dc4d7c5555b', title: 'Demo Image 3', thumbnail: 'https://imagine-public.x.ai/imagine-public/images/1b5c753c-2d25-4710-baa0-2dc4d7c5555b.jpg', tags: ['Demo'], addedAt: new Date(Date.now() - 2000).toISOString() },
-    { id: 'new_demo_4', url: 'https://grok.com/imagine/post/9ca51eba-bfce-4d18-b61d-340e8222639d', title: 'Demo Image 4', thumbnail: 'https://imagine-public.x.ai/imagine-public/images/9ca51eba-bfce-4d18-b61d-340e8222639d.jpg', tags: ['Demo'], addedAt: new Date(Date.now() - 3000).toISOString() },
-    { id: 'new_demo_5', url: 'https://grok.com/imagine/post/aedbb2c5-d2e1-4922-8630-733c803d460b', title: 'Demo Image 5', thumbnail: 'https://imagine-public.x.ai/imagine-public/images/aedbb2c5-d2e1-4922-8630-733c803d460b.jpg', tags: ['Demo'], addedAt: new Date(Date.now() - 4000).toISOString() },
-    { id: 'new_demo_6', url: 'https://grok.com/imagine/post/74040c2f-843d-4d45-af05-356179c63dd1', title: 'Demo Image 6', thumbnail: 'https://imagine-public.x.ai/imagine-public/images/74040c2f-843d-4d45-af05-356179c63dd1.jpg', tags: ['Demo'], addedAt: new Date(Date.now() - 5000).toISOString() },
-    { id: 'new_demo_7', url: 'https://grok.com/imagine/post/c6775d78-27c2-4ef4-9758-214d9eaacc0e', title: 'Demo Image 7', thumbnail: 'https://imagine-public.x.ai/imagine-public/images/c6775d78-27c2-4ef4-9758-214d9eaacc0e.jpg', tags: ['Demo'], addedAt: new Date(Date.now() - 6000).toISOString() },
-    { id: 'new_demo_8', url: 'https://grok.com/imagine/post/3bc5cfc2-a593-4f30-a537-d4db972d7692', title: 'Demo Image 8', thumbnail: 'https://imagine-public.x.ai/imagine-public/images/3bc5cfc2-a593-4f30-a537-d4db972d7692.jpg', tags: ['Demo'], addedAt: new Date(Date.now() - 7000).toISOString() },
+    { id: 'demo_1', url: 'https://grok.com/imagine/post/698a6a44-ac3b-449a-b2b4-0ee33ccdb803', title: 'Cyberpunk Portrait', thumbnail: 'https://imagine-public.x.ai/imagine-public/images/698a6a44-ac3b-449a-b2b4-0ee33ccdb803.jpg', tags: ['Demo', 'Portrait'], addedAt: new Date().toISOString() },
+    { id: 'demo_2', url: 'https://grok.com/imagine/post/a4dba2ee-6654-4f7a-985c-3d964473394d', title: 'Futuristic Landscape', thumbnail: 'https://imagine-public.x.ai/imagine-public/images/a4dba2ee-6654-4f7a-985c-3d964473394d.jpg', tags: ['Demo'], addedAt: new Date(Date.now() - 1000).toISOString() },
+    { id: 'demo_3', url: 'https://grok.com/imagine/post/740a1af2-da7e-4a28-8327-1d05e5c17c91', title: 'Anime Aesthetic', thumbnail: 'https://imagine-public.x.ai/imagine-public/images/740a1af2-da7e-4a28-8327-1d05e5c17c91.jpg', tags: ['Demo'], addedAt: new Date(Date.now() - 2000).toISOString() },
+    { id: 'demo_4', url: 'https://grok.com/imagine/post/56d72a94-0687-41eb-ab68-5c26665ebc78', title: 'Dreamy Scene', thumbnail: 'https://imagine-public.x.ai/imagine-public/images/56d72a94-0687-41eb-ab68-5c26665ebc78.jpg', tags: ['Demo'], addedAt: new Date(Date.now() - 3000).toISOString() },
+    { id: 'demo_5', url: 'https://grok.com/imagine/post/6f620019-1bd9-45bb-b5f4-2c2f65209be6', title: 'Mystical Art', thumbnail: 'https://imagine-public.x.ai/imagine-public/images/6f620019-1bd9-45bb-b5f4-2c2f65209be6.jpg', tags: ['Demo'], addedAt: new Date(Date.now() - 4000).toISOString() },
+    { id: 'demo_6', url: 'https://grok.com/imagine/post/d077c377-ad12-449d-bd43-abacf2674b80', title: 'Sci-Fi Architecture', thumbnail: 'https://imagine-public.x.ai/imagine-public/images/d077c377-ad12-449d-bd43-abacf2674b80.jpg', tags: ['Demo'], addedAt: new Date(Date.now() - 5000).toISOString() },
+    { id: 'demo_7', url: 'https://grok.com/imagine/post/e87e6394-78e7-43be-98c7-07091adbcfa4', title: 'Grok Bear', thumbnail: 'https://imagine-public.x.ai/imagine-public/images/e87e6394-78e7-43be-98c7-07091adbcfa4.jpg', tags: ['Demo', 'Bear'], addedAt: new Date(Date.now() - 6000).toISOString() },
+    { id: 'demo_8', url: 'https://grok.com/imagine/post/ea2bc771-5d90-4a1f-81a4-4b29aa69bc84', title: 'Space Bear', thumbnail: 'https://imagine-public.x.ai/imagine-public/images/ea2bc771-5d90-4a1f-81a4-4b29aa69bc84.jpg', tags: ['Demo', 'Bear'], addedAt: new Date(Date.now() - 7000).toISOString() },
+    { id: 'demo_9', url: 'https://grok.com/imagine/post/07f3971d-3b35-4343-a69d-544ace685fda', title: 'Ocean Bear', thumbnail: 'https://imagine-public.x.ai/imagine-public/images/07f3971d-3b35-4343-a69d-544ace685fda.jpg', tags: ['Demo', 'Bear'], addedAt: new Date(Date.now() - 8000).toISOString() },
+    { id: 'demo_10', url: 'https://grok.com/imagine/post/3137e8f3-0ccb-4462-a0f4-9d804a388069', title: 'Tech Bear', thumbnail: 'https://imagine-public.x.ai/imagine-public/images/3137e8f3-0ccb-4462-a0f4-9d804a388069.jpg', tags: ['Demo', 'Bear'], addedAt: new Date(Date.now() - 9000).toISOString() },
 ];
 
 /**
@@ -36,9 +38,9 @@ const DEMO_INITIAL_DATA = [
 const api = {
     getLinks: async () => {
         if (IS_DEMO) {
-            const stored = localStorage.getItem('grok_vault_links_v1_3');
+            const stored = localStorage.getItem('grok_vault_links_v1_4');
             if (!stored) {
-                localStorage.setItem('grok_vault_links_v1_3', JSON.stringify(DEMO_INITIAL_DATA));
+                localStorage.setItem('grok_vault_links_v1_4', JSON.stringify(DEMO_INITIAL_DATA));
                 return { data: DEMO_INITIAL_DATA };
             }
             return { data: JSON.parse(stored) };
@@ -55,9 +57,9 @@ const api = {
                 thumbnail: null,
                 addedAt: new Date().toISOString()
             };
-            const stored = JSON.parse(localStorage.getItem('grok_vault_links_v1_3') || '[]');
+            const stored = JSON.parse(localStorage.getItem('grok_vault_links_v1_4') || '[]');
             const newData = [newItem, ...stored];
-            localStorage.setItem('grok_vault_links_v1_3', JSON.stringify(newData));
+            localStorage.setItem('grok_vault_links_v1_4', JSON.stringify(newData));
             return { data: newItem };
         }
         return axios.post(`${API_URL}/links`, { url, tags });
@@ -72,43 +74,43 @@ const api = {
                 thumbnail: l.thumbnail || null,
                 addedAt: new Date().toISOString()
             }));
-            const stored = JSON.parse(localStorage.getItem('grok_vault_links_v1_3') || '[]');
+            const stored = JSON.parse(localStorage.getItem('grok_vault_links_v1_4') || '[]');
             const newData = [...newItems, ...stored];
-            localStorage.setItem('grok_vault_links_v1_3', JSON.stringify(newData));
+            localStorage.setItem('grok_vault_links_v1_4', JSON.stringify(newData));
             return { data: newItems };
         }
         return axios.post(`${API_URL}/links/bulk`, { links, tags });
     },
     updateLink: async (id, updates) => {
         if (IS_DEMO) {
-            const stored = JSON.parse(localStorage.getItem('grok_vault_links_v1_3') || '[]');
+            const stored = JSON.parse(localStorage.getItem('grok_vault_links_v1_4') || '[]');
             const newData = stored.map(link => link.id === id ? { ...link, ...updates } : link);
-            localStorage.setItem('grok_vault_links_v1_3', JSON.stringify(newData));
+            localStorage.setItem('grok_vault_links_v1_4', JSON.stringify(newData));
             return { data: { success: true } };
         }
         return axios.patch(`${API_URL}/links/${id}`, updates);
     },
     bulkPatch: async (ids, updates) => {
         if (IS_DEMO) {
-            const stored = JSON.parse(localStorage.getItem('grok_vault_links_v1_3') || '[]');
+            const stored = JSON.parse(localStorage.getItem('grok_vault_links_v1_4') || '[]');
             const newData = stored.map(link => ids.includes(link.id) ? { ...link, ...updates } : link);
-            localStorage.setItem('grok_vault_links_v1_3', JSON.stringify(newData));
+            localStorage.setItem('grok_vault_links_v1_4', JSON.stringify(newData));
             return { data: { success: true } };
         }
         return axios.post(`${API_URL}/links/bulk-patch`, { ids, updates });
     },
     bulkDelete: async (ids) => {
         if (IS_DEMO) {
-            const stored = JSON.parse(localStorage.getItem('grok_vault_links_v1_3') || '[]');
+            const stored = JSON.parse(localStorage.getItem('grok_vault_links_v1_4') || '[]');
             const newData = stored.filter(link => !ids.includes(link.id));
-            localStorage.setItem('grok_vault_links_v1_3', JSON.stringify(newData));
+            localStorage.setItem('grok_vault_links_v1_4', JSON.stringify(newData));
             return { data: { success: true } };
         }
         return axios.post(`${API_URL}/links/bulk-delete`, { ids });
     },
     globalRenameTag: async (oldTag, newTag) => {
         if (IS_DEMO) {
-            const stored = JSON.parse(localStorage.getItem('grok_vault_links_v1_3') || '[]');
+            const stored = JSON.parse(localStorage.getItem('grok_vault_links_v1_4') || '[]');
             let changed = false;
             const newData = stored.map(link => {
                 if (link.tags && link.tags.includes(oldTag)) {
@@ -118,14 +120,14 @@ const api = {
                 }
                 return link;
             });
-            if (changed) localStorage.setItem('grok_vault_links_v1_3', JSON.stringify(newData));
+            if (changed) localStorage.setItem('grok_vault_links_v1_4', JSON.stringify(newData));
             return { data: { success: true } };
         }
         return axios.post(`${API_URL}/tags/rename`, { oldTag, newTag });
     },
     globalDeleteTag: async (tag) => {
         if (IS_DEMO) {
-            const stored = JSON.parse(localStorage.getItem('grok_vault_links_v1_3') || '[]');
+            const stored = JSON.parse(localStorage.getItem('grok_vault_links_v1_4') || '[]');
             let changed = false;
             const newData = stored.map(link => {
                 if (link.tags && link.tags.includes(tag)) {
@@ -134,14 +136,14 @@ const api = {
                 }
                 return link;
             });
-            if (changed) localStorage.setItem('grok_vault_links_v1_3', JSON.stringify(newData));
+            if (changed) localStorage.setItem('grok_vault_links_v1_4', JSON.stringify(newData));
             return { data: { success: true } };
         }
         return axios.post(`${API_URL}/tags/delete`, { tag });
     },
     importData: async (dataToImport) => {
         if (IS_DEMO) {
-            localStorage.setItem('grok_vault_links_v1_3', JSON.stringify(dataToImport));
+            localStorage.setItem('grok_vault_links_v1_4', JSON.stringify(dataToImport));
             return { data: { success: true, count: dataToImport.length } };
         }
         return axios.post(`${API_URL}/links/import`, { data: dataToImport });
