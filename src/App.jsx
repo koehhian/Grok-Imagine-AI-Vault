@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
-import { Search, Plus, ExternalLink, RefreshCw, Trash2, Image as ImageIcon, Languages, Globe, Tag, Check, X, ChevronDown, MoreHorizontal, Edit2, Download, Upload, ArrowUpDown, Settings } from 'lucide-react';
+import { Search, Plus, ExternalLink, RefreshCw, Trash2, Image as ImageIcon, Languages, Globe, Tag, Check, CheckSquare, X, ChevronDown, MoreHorizontal, Edit2, Download, Upload, ArrowUpDown, Settings } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -19,7 +19,7 @@ const IS_DEMO = typeof window !== 'undefined' && (
 
 // Mock Data for Demo
 const DEMO_INITIAL_DATA = [
-    { id: 'demo1', url: 'https://grok.com/1', title: 'Cosmic Bear', thumbnail: 'https://images.unsplash.com/photo-1614728263952-84ea256f9679?w=500&auto=format&fit=crop&q=60', tags: ['Demo', 'Art'], addedAt: new Date().toISOString() },
+    { id: 'demo1', url: 'https://grok.com/1', title: 'Rocket Launch', thumbnail: 'https://images.unsplash.com/photo-1517976487492-5750f3195933?q=80&w=600&auto=format&fit=crop', tags: ['Demo', 'Art'], addedAt: new Date().toISOString() },
     { id: 'demo2', url: 'https://grok.com/2', title: 'Future City', thumbnail: 'https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?w=500&auto=format&fit=crop&q=60', tags: ['Demo', 'SciFi'], addedAt: new Date(Date.now() - 86400000).toISOString() },
     { id: 'demo3', url: 'https://grok.com/3', title: 'Neon Portrait', thumbnail: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?w=500&auto=format&fit=crop&q=60', tags: ['Demo', 'Portrait'], addedAt: new Date(Date.now() - 172800000).toISOString() },
 ];
@@ -193,7 +193,9 @@ const TRANSLATIONS = {
         deleteTag: 'Delete Tag',
         globalRenamePrompt: 'Rename tag "{tag}" to:',
         globalDeleteConfirm: 'Are you sure you want to delete tag "{tag}" from all items?',
-        exportSuccess: 'Data exported to your browser\'s default download path.'
+        exportSuccess: 'Data exported to your browser\'s default download path.',
+        selectAll: 'Select All',
+        deselectAll: 'Deselect All'
     },
     'zh-cn': {
         title: 'Grok Imagine AI Vault',
@@ -236,7 +238,9 @@ const TRANSLATIONS = {
         deleteTag: '删除标签',
         globalRenamePrompt: '将标签 "{tag}" 重命名为：',
         globalDeleteConfirm: '确定要从所有项目中删除标签 "{tag}" 吗？',
-        exportSuccess: '数据已导出至浏览器默认下载路径。'
+        exportSuccess: '数据已导出至浏览器默认下载路径。',
+        selectAll: '全选',
+        deselectAll: '取消全选'
     },
     'zh-tw': {
         title: 'Grok Imagine AI Vault',
@@ -279,7 +283,9 @@ const TRANSLATIONS = {
         deleteTag: '刪除標籤',
         globalRenamePrompt: '將標籤「{tag}」重新命名為：',
         globalDeleteConfirm: '確定要從所有項目中刪除標籤「{tag}」嗎？',
-        exportSuccess: '資料已匯出至瀏覽器預設的下載路徑。'
+        exportSuccess: '資料已匯出至瀏覽器預設的下載路徑。',
+        selectAll: '全選',
+        deselectAll: '取消全選'
     },
     'ja': {
         title: 'Grok Imagine AI Vault',
@@ -322,7 +328,9 @@ const TRANSLATIONS = {
         deleteTag: 'タグを削除',
         globalRenamePrompt: 'タグ「{tag}」を以下に変更：',
         globalDeleteConfirm: 'すべての項目からタグ「{tag}」を削除してもよろしいですか？',
-        exportSuccess: 'データはブラウザのデフォルトの保存先にエクスポートされました。'
+        exportSuccess: 'データはブラウザのデフォルトの保存先にエクスポートされました。',
+        selectAll: 'すべて選択',
+        deselectAll: '選択解除'
     }
 };
 
@@ -366,6 +374,36 @@ export default function App() {
         fetchLinks();
     }, []);
 
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            // Cmd+A or Ctrl+A for Select All
+            if ((e.metaKey || e.ctrlKey) && e.key === 'a') {
+                if (!['INPUT', 'TEXTAREA'].includes(e.target.tagName)) {
+                    e.preventDefault();
+                    setSelectedIds(new Set(links.map(link => link.id)));
+                }
+            }
+            // Del or Backspace for Delete Selected
+            if (selectedIds.size > 0 && (e.key === 'Delete' || e.key === 'Backspace')) {
+                if (!['INPUT', 'TEXTAREA'].includes(e.target.tagName)) {
+                    e.preventDefault();
+                    bulkDelete();
+                }
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [links, selectedIds]);
+
+    const handleSelectAll = () => {
+        if (selectedIds.size === links.length) {
+            setSelectedIds(new Set());
+        } else {
+            setSelectedIds(new Set(links.map(l => l.id)));
+        }
+    };
+
     const fetchLinks = async () => {
         try {
             const { data } = await api.getLinks();
@@ -373,6 +411,14 @@ export default function App() {
         } catch (err) {
             console.error('Failed to fetch links', err);
         }
+    };
+
+    const deriveGrokThumbnail = (url) => {
+        const match = url.match(/grok\.com\/imagine\/post\/([a-f0-9-]+)/i);
+        if (match) {
+            return `https://imagine-public.x.ai/imagine-public/images/${match[1]}.png`;
+        }
+        return null;
     };
 
     const addLink = async (e) => {
@@ -387,10 +433,20 @@ export default function App() {
         try {
             const tagArray = newTags.split(',').map(t => t.trim()).filter(t => t);
             if (urls.length === 1) {
-                const response = await api.addLink(urls[0], tagArray);
+                const url = urls[0];
+                const thumbnail = deriveGrokThumbnail(url);
+                const response = await api.addLink(url, tagArray);
+                if (thumbnail) {
+                    await api.updateLink(response.data.id, { thumbnail });
+                    response.data.thumbnail = thumbnail;
+                }
                 setLinks([response.data, ...links]);
             } else {
-                const response = await api.addBulk(urls.map(url => ({ url })), tagArray);
+                const bulkItems = urls.map(url => ({
+                    url,
+                    thumbnail: deriveGrokThumbnail(url)
+                }));
+                const response = await api.addBulk(bulkItems, tagArray);
                 setLinks([...response.data, ...links]);
             }
             setNewUrl('');
@@ -607,16 +663,60 @@ export default function App() {
         console.log(`Launched external Grok window for card ${id}`);
     };
 
+    const handleHeaderDrop = async (e) => {
+        e.preventDefault();
+        setDragOverId(null);
+        let droppedText = e.dataTransfer.getData('text/plain') || e.dataTransfer.getData('URL');
+
+        if (!droppedText) {
+            const html = e.dataTransfer.getData('text/html');
+            if (html) {
+                const match = html.match(/href=["']?([^"'\s>]+)["']?/i) || html.match(/src=["']?([^"'\s>]+)["']?/i);
+                if (match) droppedText = match[1];
+            }
+        }
+
+        if (droppedText) {
+            let finalUrl = droppedText;
+            let thumbnail = deriveGrokThumbnail(droppedText);
+
+            // Transform Grok public image links
+            const grokPattern = /https:\/\/imagine-public\.x\.ai\/imagine-public\/images\/([a-f0-9-]+)\.png/i;
+            const match = droppedText.match(grokPattern);
+            if (match) {
+                finalUrl = `https://grok.com/imagine/post/${match[1]}`;
+                thumbnail = droppedText;
+            }
+
+            setNewUrl(finalUrl);
+            const tagArray = newTags.split(',').map(t => t.trim()).filter(t => t);
+            const response = await api.addLink(finalUrl, tagArray);
+            if (thumbnail) {
+                await api.updateLink(response.data.id, { thumbnail });
+                response.data.thumbnail = thumbnail;
+            }
+            setLinks([response.data, ...links]);
+            setNewUrl('');
+        }
+    };
+
 
     const allTags = useMemo(() => {
-        const tags = new Set();
+        const counts = {};
         links.forEach(link => {
             if (link.tags && Array.isArray(link.tags)) {
-                link.tags.forEach(tag => tags.add(tag));
+                link.tags.forEach(tag => {
+                    counts[tag] = (counts[tag] || 0) + 1;
+                });
             }
         });
-        return ['ALL', ...Array.from(tags)];
-    }, [links, language]);
+
+        const sortedTags = Object.keys(counts).sort();
+        return [
+            { name: 'ALL', count: links.length },
+            ...sortedTags.map(tag => ({ name: tag, count: counts[tag] }))
+        ];
+    }, [links]);
 
     const filteredLinks = useMemo(() => {
         let result = links.filter(link => {
@@ -834,7 +934,17 @@ export default function App() {
                     </header>
 
                     {/* Secondary Row: Bulk Add */}
-                    <div className="flex flex-col lg:flex-row gap-4 mb-8 bg-zinc-900/30 p-4 rounded-3xl border border-zinc-800/30">
+                    <div
+                        onDragOver={(e) => { e.preventDefault(); setDragOverId('header'); }}
+                        onDragLeave={() => setDragOverId(null)}
+                        onDrop={handleHeaderDrop}
+                        className={cn(
+                            "flex flex-col lg:flex-row gap-4 mb-8 p-4 rounded-3xl border transition-all duration-300",
+                            dragOverId === 'header'
+                                ? "bg-blue-500/10 border-blue-500/50 scale-[1.01] shadow-2xl shadow-blue-500/10"
+                                : "bg-zinc-900/30 border-zinc-800/30"
+                        )}
+                    >
                         <div className="flex flex-1 gap-2">
                             <textarea
                                 placeholder={t('bulkAddPlaceholder')}
@@ -872,16 +982,20 @@ export default function App() {
                 <div className="flex flex-wrap items-center gap-2 pb-2 relative">
                     {allTags.slice(0, 6).map(tag => (
                         <button
-                            key={tag}
-                            onClick={() => setTagFilter(tag)}
+                            key={tag.name}
+                            onClick={() => setTagFilter(tag.name)}
                             className={cn(
-                                "px-4 py-1.5 rounded-full text-sm font-medium transition-all whitespace-nowrap",
-                                tagFilter === tag
+                                "px-4 py-1.5 rounded-full text-sm font-medium transition-all whitespace-nowrap flex items-center gap-2",
+                                tagFilter === tag.name
                                     ? "bg-white text-black shadow-lg"
                                     : "bg-zinc-900 text-zinc-400 border border-zinc-800 hover:bg-zinc-800"
                             )}
                         >
-                            {tag === 'ALL' ? t('allProducts') : tag}
+                            {tag.name === 'ALL' ? t('allProducts') : tag.name}
+                            <span className={cn(
+                                "text-[10px] opacity-70",
+                                tagFilter === tag.name ? "text-black/60" : "text-zinc-600"
+                            )}>{tag.count}</span>
                         </button>
                     ))}
 
@@ -891,7 +1005,7 @@ export default function App() {
                                 onClick={() => setMoreTagsOpen(!moreTagsOpen)}
                                 className={cn(
                                     "px-4 py-1.5 rounded-full text-sm font-medium transition-all flex items-center gap-2",
-                                    allTags.slice(6).includes(tagFilter)
+                                    allTags.slice(6).some(t => t.name === tagFilter)
                                         ? "bg-white text-black"
                                         : "bg-zinc-900 text-zinc-400 border border-zinc-800 hover:bg-zinc-800"
                                 )}
@@ -911,14 +1025,15 @@ export default function App() {
                                     >
                                         {allTags.slice(6).map(tag => (
                                             <button
-                                                key={tag}
-                                                onClick={() => { setTagFilter(tag); setMoreTagsOpen(false); }}
+                                                key={tag.name}
+                                                onClick={() => { setTagFilter(tag.name); setMoreTagsOpen(false); }}
                                                 className={cn(
-                                                    "px-3 py-1.5 rounded-lg text-xs font-medium text-left truncate transition-colors",
-                                                    tagFilter === tag ? "bg-white text-black" : "hover:bg-zinc-800 text-zinc-400"
+                                                    "px-3 py-1.5 rounded-lg text-xs font-medium text-left truncate transition-colors flex items-center justify-between",
+                                                    tagFilter === tag.name ? "bg-white text-black" : "hover:bg-zinc-800 text-zinc-400"
                                                 )}
                                             >
-                                                {tag}
+                                                <span className="truncate">{tag.name}</span>
+                                                <span className="ml-2 text-[10px] opacity-60">{tag.count}</span>
                                             </button>
                                         ))}
                                     </motion.div>
@@ -1127,6 +1242,13 @@ export default function App() {
                         <span className="text-sm font-semibold text-blue-400 border-r border-slate-700 pr-4 mr-2">
                             {t('selectedCount', { count: selectedIds.size })}
                         </span>
+                        <button
+                            onClick={handleSelectAll}
+                            className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-xl text-sm font-medium transition-colors"
+                        >
+                            <CheckSquare className="w-4 h-4 text-blue-400 opacity-80" />
+                            {selectedIds.size === links.length ? t('deselectAll') : t('selectAll')}
+                        </button>
                         <button
                             onClick={bulkUpdateTags}
                             className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-xl text-sm font-medium transition-colors"

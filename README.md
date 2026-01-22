@@ -42,6 +42,12 @@ For the best experience with Grok Imagine links:
 > [!IMPORTANT]
 > **Static Image Requirement**: When copying a public post link from Grok, ensure you are viewing a **static image**. If you copy a link while the image is still generating or in a dynamic view, the thumbnail derivation may fail.
 
+### Manual Video Thumbnails
+Currently, videos (including image links that have already been made into videos) do not support automatic thumbnails and need to be added manually. The method is simple:
+1. Click the icon popup on the card to open the Grok page.
+2. Manually switch from **Video** to **Image** in Grok.
+3. Drag the preview image back to the **Grok Imagine AI Vault** card to add the thumbnail.
+
 ### Batch Upload
 You can paste multiple links (one per line) in the bulk add field. You can also specify tags for the entire batch at once.
 
