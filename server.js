@@ -26,7 +26,9 @@ if (!fs.existsSync(DATA_FILE)) {
 // Robust Grok Thumbnail Extractor
 const getGrokThumbnail = (url) => {
     if (!url || typeof url !== 'string') return null;
-    const match = url.match(/post\/([a-z0-9-]+)/i);
+    // Enhanced regex to match post, video, or just the UUID in Grok/x.ai context
+    const match = url.match(/(?:post|video|images|share)\/([a-f0-9-]{36})/i) ||
+        url.match(/\/([a-f0-9-]{36})/i);
     if (match && match[1]) {
         return `https://imagine-public.x.ai/imagine-public/images/${match[1]}.jpg`;
     }
