@@ -19,7 +19,7 @@ const IS_DEMO = typeof window !== 'undefined' && (
 
 // Mock Data for Demo
 const DEMO_INITIAL_DATA = [
-    { id: 'demo1', url: 'https://grok.com/1', title: 'Cosmic Bear', thumbnail: 'https://images.unsplash.com/photo-1540324864478-f604ecf97805?w=500&auto=format&fit=crop&q=60', tags: ['Demo', 'Art'], addedAt: new Date().toISOString() },
+    { id: 'demo1', url: 'https://grok.com/1', title: 'Cosmic Bear', thumbnail: 'https://images.unsplash.com/photo-1614728263952-84ea256f9679?w=500&auto=format&fit=crop&q=60', tags: ['Demo', 'Art'], addedAt: new Date().toISOString() },
     { id: 'demo2', url: 'https://grok.com/2', title: 'Future City', thumbnail: 'https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?w=500&auto=format&fit=crop&q=60', tags: ['Demo', 'SciFi'], addedAt: new Date(Date.now() - 86400000).toISOString() },
     { id: 'demo3', url: 'https://grok.com/3', title: 'Neon Portrait', thumbnail: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?w=500&auto=format&fit=crop&q=60', tags: ['Demo', 'Portrait'], addedAt: new Date(Date.now() - 172800000).toISOString() },
 ];
@@ -31,9 +31,9 @@ const DEMO_INITIAL_DATA = [
 const api = {
     getLinks: async () => {
         if (IS_DEMO) {
-            const stored = localStorage.getItem('grok_vault_links');
+            const stored = localStorage.getItem('grok_vault_links_v1_1');
             if (!stored) {
-                localStorage.setItem('grok_vault_links', JSON.stringify(DEMO_INITIAL_DATA));
+                localStorage.setItem('grok_vault_links_v1_1', JSON.stringify(DEMO_INITIAL_DATA));
                 return { data: DEMO_INITIAL_DATA };
             }
             return { data: JSON.parse(stored) };
@@ -50,9 +50,9 @@ const api = {
                 thumbnail: null,
                 addedAt: new Date().toISOString()
             };
-            const stored = JSON.parse(localStorage.getItem('grok_vault_links') || '[]');
+            const stored = JSON.parse(localStorage.getItem('grok_vault_links_v1_1') || '[]');
             const newData = [newItem, ...stored];
-            localStorage.setItem('grok_vault_links', JSON.stringify(newData));
+            localStorage.setItem('grok_vault_links_v1_1', JSON.stringify(newData));
             return { data: newItem };
         }
         return axios.post(`${API_URL}/links`, { url, tags });
@@ -67,43 +67,43 @@ const api = {
                 thumbnail: null,
                 addedAt: new Date().toISOString()
             }));
-            const stored = JSON.parse(localStorage.getItem('grok_vault_links') || '[]');
+            const stored = JSON.parse(localStorage.getItem('grok_vault_links_v1_1') || '[]');
             const newData = [...newItems, ...stored];
-            localStorage.setItem('grok_vault_links', JSON.stringify(newData));
+            localStorage.setItem('grok_vault_links_v1_1', JSON.stringify(newData));
             return { data: newItems };
         }
         return axios.post(`${API_URL}/links/bulk`, { links, tags });
     },
     updateLink: async (id, updates) => {
         if (IS_DEMO) {
-            const stored = JSON.parse(localStorage.getItem('grok_vault_links') || '[]');
+            const stored = JSON.parse(localStorage.getItem('grok_vault_links_v1_1') || '[]');
             const newData = stored.map(link => link.id === id ? { ...link, ...updates } : link);
-            localStorage.setItem('grok_vault_links', JSON.stringify(newData));
+            localStorage.setItem('grok_vault_links_v1_1', JSON.stringify(newData));
             return { data: { success: true } };
         }
         return axios.patch(`${API_URL}/links/${id}`, updates);
     },
     bulkPatch: async (ids, updates) => {
         if (IS_DEMO) {
-            const stored = JSON.parse(localStorage.getItem('grok_vault_links') || '[]');
+            const stored = JSON.parse(localStorage.getItem('grok_vault_links_v1_1') || '[]');
             const newData = stored.map(link => ids.includes(link.id) ? { ...link, ...updates } : link);
-            localStorage.setItem('grok_vault_links', JSON.stringify(newData));
+            localStorage.setItem('grok_vault_links_v1_1', JSON.stringify(newData));
             return { data: { success: true } };
         }
         return axios.post(`${API_URL}/links/bulk-patch`, { ids, updates });
     },
     bulkDelete: async (ids) => {
         if (IS_DEMO) {
-            const stored = JSON.parse(localStorage.getItem('grok_vault_links') || '[]');
+            const stored = JSON.parse(localStorage.getItem('grok_vault_links_v1_1') || '[]');
             const newData = stored.filter(link => !ids.includes(link.id));
-            localStorage.setItem('grok_vault_links', JSON.stringify(newData));
+            localStorage.setItem('grok_vault_links_v1_1', JSON.stringify(newData));
             return { data: { success: true } };
         }
         return axios.post(`${API_URL}/links/bulk-delete`, { ids });
     },
     globalRenameTag: async (oldTag, newTag) => {
         if (IS_DEMO) {
-            const stored = JSON.parse(localStorage.getItem('grok_vault_links') || '[]');
+            const stored = JSON.parse(localStorage.getItem('grok_vault_links_v1_1') || '[]');
             let changed = false;
             const newData = stored.map(link => {
                 if (link.tags && link.tags.includes(oldTag)) {
@@ -113,14 +113,14 @@ const api = {
                 }
                 return link;
             });
-            if (changed) localStorage.setItem('grok_vault_links', JSON.stringify(newData));
+            if (changed) localStorage.setItem('grok_vault_links_v1_1', JSON.stringify(newData));
             return { data: { success: true } };
         }
         return axios.post(`${API_URL}/tags/rename`, { oldTag, newTag });
     },
     globalDeleteTag: async (tag) => {
         if (IS_DEMO) {
-            const stored = JSON.parse(localStorage.getItem('grok_vault_links') || '[]');
+            const stored = JSON.parse(localStorage.getItem('grok_vault_links_v1_1') || '[]');
             let changed = false;
             const newData = stored.map(link => {
                 if (link.tags && link.tags.includes(tag)) {
@@ -129,21 +129,21 @@ const api = {
                 }
                 return link;
             });
-            if (changed) localStorage.setItem('grok_vault_links', JSON.stringify(newData));
+            if (changed) localStorage.setItem('grok_vault_links_v1_1', JSON.stringify(newData));
             return { data: { success: true } };
         }
         return axios.post(`${API_URL}/tags/delete`, { tag });
     },
     importData: async (dataToImport) => {
         if (IS_DEMO) {
-            localStorage.setItem('grok_vault_links', JSON.stringify(dataToImport));
+            localStorage.setItem('grok_vault_links_v1_1', JSON.stringify(dataToImport));
             return { data: { success: true, count: dataToImport.length } };
         }
         return axios.post(`${API_URL}/links/import`, { data: dataToImport });
     },
     getExportUrl: () => {
         if (IS_DEMO) {
-            const stored = localStorage.getItem('grok_vault_links') || '[]';
+            const stored = localStorage.getItem('grok_vault_links_v1_1') || '[]';
             const blob = new Blob([stored], { type: 'application/json' });
             return URL.createObjectURL(blob);
         }
@@ -694,7 +694,7 @@ export default function App() {
                             animate={{ opacity: 1, x: 0 }}
                             className="flex items-center gap-3"
                         >
-                            <img src="logo-sm.png" alt="Logo" className="w-10 h-10 object-contain" />
+                            <img src="/logo-sm.png" alt="Logo" className="w-10 h-10 object-contain" />
                             <div>
                                 <h1 className="text-4xl font-bold tracking-tight text-white flex items-center gap-3">
                                     {t('title')}
@@ -1166,7 +1166,7 @@ export default function App() {
                                 onClick={() => setActiveGrokUrl(null)}
                                 className="p-1.5 hover:bg-slate-800 rounded-lg text-slate-500 transition-colors"
                             >
-                                <Trash2 className="w-4 h-4" />
+                                <X className="w-4 h-4" />
                             </button>
                         </div>
 
