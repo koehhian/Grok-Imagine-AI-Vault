@@ -39,9 +39,9 @@ const DEMO_INITIAL_DATA = [
 const api = {
     getLinks: async () => {
         if (IS_DEMO) {
-            const stored = localStorage.getItem('grok_vault_links_v1_1');
+            const stored = localStorage.getItem('grok_vault_links_v1_2');
             if (!stored) {
-                localStorage.setItem('grok_vault_links_v1_1', JSON.stringify(DEMO_INITIAL_DATA));
+                localStorage.setItem('grok_vault_links_v1_2', JSON.stringify(DEMO_INITIAL_DATA));
                 return { data: DEMO_INITIAL_DATA };
             }
             return { data: JSON.parse(stored) };
@@ -58,9 +58,9 @@ const api = {
                 thumbnail: null,
                 addedAt: new Date().toISOString()
             };
-            const stored = JSON.parse(localStorage.getItem('grok_vault_links_v1_1') || '[]');
+            const stored = JSON.parse(localStorage.getItem('grok_vault_links_v1_2') || '[]');
             const newData = [newItem, ...stored];
-            localStorage.setItem('grok_vault_links_v1_1', JSON.stringify(newData));
+            localStorage.setItem('grok_vault_links_v1_2', JSON.stringify(newData));
             return { data: newItem };
         }
         return axios.post(`${API_URL}/links`, { url, tags });
@@ -75,43 +75,43 @@ const api = {
                 thumbnail: null,
                 addedAt: new Date().toISOString()
             }));
-            const stored = JSON.parse(localStorage.getItem('grok_vault_links_v1_1') || '[]');
+            const stored = JSON.parse(localStorage.getItem('grok_vault_links_v1_2') || '[]');
             const newData = [...newItems, ...stored];
-            localStorage.setItem('grok_vault_links_v1_1', JSON.stringify(newData));
+            localStorage.setItem('grok_vault_links_v1_2', JSON.stringify(newData));
             return { data: newItems };
         }
         return axios.post(`${API_URL}/links/bulk`, { links, tags });
     },
     updateLink: async (id, updates) => {
         if (IS_DEMO) {
-            const stored = JSON.parse(localStorage.getItem('grok_vault_links_v1_1') || '[]');
+            const stored = JSON.parse(localStorage.getItem('grok_vault_links_v1_2') || '[]');
             const newData = stored.map(link => link.id === id ? { ...link, ...updates } : link);
-            localStorage.setItem('grok_vault_links_v1_1', JSON.stringify(newData));
+            localStorage.setItem('grok_vault_links_v1_2', JSON.stringify(newData));
             return { data: { success: true } };
         }
         return axios.patch(`${API_URL}/links/${id}`, updates);
     },
     bulkPatch: async (ids, updates) => {
         if (IS_DEMO) {
-            const stored = JSON.parse(localStorage.getItem('grok_vault_links_v1_1') || '[]');
+            const stored = JSON.parse(localStorage.getItem('grok_vault_links_v1_2') || '[]');
             const newData = stored.map(link => ids.includes(link.id) ? { ...link, ...updates } : link);
-            localStorage.setItem('grok_vault_links_v1_1', JSON.stringify(newData));
+            localStorage.setItem('grok_vault_links_v1_2', JSON.stringify(newData));
             return { data: { success: true } };
         }
         return axios.post(`${API_URL}/links/bulk-patch`, { ids, updates });
     },
     bulkDelete: async (ids) => {
         if (IS_DEMO) {
-            const stored = JSON.parse(localStorage.getItem('grok_vault_links_v1_1') || '[]');
+            const stored = JSON.parse(localStorage.getItem('grok_vault_links_v1_2') || '[]');
             const newData = stored.filter(link => !ids.includes(link.id));
-            localStorage.setItem('grok_vault_links_v1_1', JSON.stringify(newData));
+            localStorage.setItem('grok_vault_links_v1_2', JSON.stringify(newData));
             return { data: { success: true } };
         }
         return axios.post(`${API_URL}/links/bulk-delete`, { ids });
     },
     globalRenameTag: async (oldTag, newTag) => {
         if (IS_DEMO) {
-            const stored = JSON.parse(localStorage.getItem('grok_vault_links_v1_1') || '[]');
+            const stored = JSON.parse(localStorage.getItem('grok_vault_links_v1_2') || '[]');
             let changed = false;
             const newData = stored.map(link => {
                 if (link.tags && link.tags.includes(oldTag)) {
@@ -121,14 +121,14 @@ const api = {
                 }
                 return link;
             });
-            if (changed) localStorage.setItem('grok_vault_links_v1_1', JSON.stringify(newData));
+            if (changed) localStorage.setItem('grok_vault_links_v1_2', JSON.stringify(newData));
             return { data: { success: true } };
         }
         return axios.post(`${API_URL}/tags/rename`, { oldTag, newTag });
     },
     globalDeleteTag: async (tag) => {
         if (IS_DEMO) {
-            const stored = JSON.parse(localStorage.getItem('grok_vault_links_v1_1') || '[]');
+            const stored = JSON.parse(localStorage.getItem('grok_vault_links_v1_2') || '[]');
             let changed = false;
             const newData = stored.map(link => {
                 if (link.tags && link.tags.includes(tag)) {
@@ -137,14 +137,14 @@ const api = {
                 }
                 return link;
             });
-            if (changed) localStorage.setItem('grok_vault_links_v1_1', JSON.stringify(newData));
+            if (changed) localStorage.setItem('grok_vault_links_v1_2', JSON.stringify(newData));
             return { data: { success: true } };
         }
         return axios.post(`${API_URL}/tags/delete`, { tag });
     },
     importData: async (dataToImport) => {
         if (IS_DEMO) {
-            localStorage.setItem('grok_vault_links_v1_1', JSON.stringify(dataToImport));
+            localStorage.setItem('grok_vault_links_v1_2', JSON.stringify(dataToImport));
             return { data: { success: true, count: dataToImport.length } };
         }
         return axios.post(`${API_URL}/links/import`, { data: dataToImport });
