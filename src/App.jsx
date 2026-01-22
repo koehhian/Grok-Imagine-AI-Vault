@@ -675,24 +675,37 @@ export default function App() {
         e.preventDefault();
         setDragOverId(null);
 
+        // Comprehensive URL search pattern
+        const urlRegex = /(https?:\/\/[^\s,<>]+)/gi;
         let droppedText = null;
-        const dUrl = e.dataTransfer.getData('URL');
-        const dUriList = e.dataTransfer.getData('text/uri-list');
-        const dPlain = e.dataTransfer.getData('text/plain');
-        const dHtml = e.dataTransfer.getData('text/html');
 
-        // 1. Prioritize actual HTTP URLs (ignoring data: URLs)
-        if (dUrl && dUrl.startsWith('http')) droppedText = dUrl;
-        else if (dUriList && dUriList.startsWith('http')) droppedText = dUriList.split('\n')[0];
-        else if (dPlain && dPlain.startsWith('http')) droppedText = dPlain;
-        else if (dHtml) {
-            const match = dHtml.match(/href=["']?([^"' \s>]+)["']?/i) || dHtml.match(/src=["']?([^"' \s>]+)["']?/i);
-            if (match && match[1].startsWith('http')) droppedText = match[1];
+        const dataFlavors = ['URL', 'text/uri-list', 'text/plain', 'text/html'];
+
+        for (const flavor of dataFlavors) {
+            const data = e.dataTransfer.getData(flavor);
+            if (!data) continue;
+
+            // Log for debugging (only in development or if user has issues)
+            console.log(`Drop Flavor: ${flavor}`, data.substring(0, 100));
+
+            // Extract first match that looks like a web URL (ignore data: URLs)
+            const matches = data.match(urlRegex);
+            if (matches) {
+                // Find the first one that actually starts with http (to exclude random stuff)
+                const validUrl = matches.find(m => m.toLowerCase().startsWith('http'));
+                if (validUrl) {
+                    droppedText = validUrl;
+                    break;
+                }
+            }
         }
 
-        // 2. Fallback for raw UUID strings (turn into Grok URL)
-        if (!droppedText && dPlain && /^[a-f0-9-]{36}$/i.test(dPlain.trim())) {
-            droppedText = `https://grok.com/imagine/post/${dPlain.trim()}`;
+        // Fallback for raw UUID strings (if no URL found)
+        if (!droppedText) {
+            const plain = e.dataTransfer.getData('text/plain').trim();
+            if (/^[a-f0-9-]{36}$/i.test(plain)) {
+                droppedText = `https://grok.com/imagine/post/${plain}`;
+            }
         }
 
         if (droppedText) {
@@ -716,6 +729,8 @@ export default function App() {
             }
             setLinks([response.data, ...links]);
             setNewUrl('');
+        } else {
+            console.warn('Header drop: No valid URL or UUID found in flavours:', e.dataTransfer.types);
         }
     };
 
