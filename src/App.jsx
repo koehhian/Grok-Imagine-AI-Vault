@@ -674,14 +674,25 @@ export default function App() {
     const handleHeaderDrop = async (e) => {
         e.preventDefault();
         setDragOverId(null);
-        let droppedText = e.dataTransfer.getData('text/plain') || e.dataTransfer.getData('URL');
 
-        if (!droppedText) {
-            const html = e.dataTransfer.getData('text/html');
-            if (html) {
-                const match = html.match(/href=["']?([^"' \s>]+)["']?/i) || html.match(/src=["']?([^"' \s>]+)["']?/i);
-                if (match) droppedText = match[1];
-            }
+        let droppedText = null;
+        const dUrl = e.dataTransfer.getData('URL');
+        const dUriList = e.dataTransfer.getData('text/uri-list');
+        const dPlain = e.dataTransfer.getData('text/plain');
+        const dHtml = e.dataTransfer.getData('text/html');
+
+        // 1. Prioritize actual HTTP URLs (ignoring data: URLs)
+        if (dUrl && dUrl.startsWith('http')) droppedText = dUrl;
+        else if (dUriList && dUriList.startsWith('http')) droppedText = dUriList.split('\n')[0];
+        else if (dPlain && dPlain.startsWith('http')) droppedText = dPlain;
+        else if (dHtml) {
+            const match = dHtml.match(/href=["']?([^"' \s>]+)["']?/i) || dHtml.match(/src=["']?([^"' \s>]+)["']?/i);
+            if (match && match[1].startsWith('http')) droppedText = match[1];
+        }
+
+        // 2. Fallback for raw UUID strings (turn into Grok URL)
+        if (!droppedText && dPlain && /^[a-f0-9-]{36}$/i.test(dPlain.trim())) {
+            droppedText = `https://grok.com/imagine/post/${dPlain.trim()}`;
         }
 
         if (droppedText) {
