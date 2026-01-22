@@ -341,7 +341,7 @@ export default function App() {
     const [loading, setLoading] = useState(false);
     const [isBlurred, setIsBlurred] = useState(true);
     const [newTags, setNewTags] = useState('');
-    const [tagFilter, setTagFilter] = useState('ALL');
+    const [selectedTags, setSelectedTags] = useState(new Set());
     const [moreTagsOpen, setMoreTagsOpen] = useState(false);
     const [activeGrokUrl, setActiveGrokUrl] = useState(null);
     const [dragOverId, setDragOverId] = useState(null);
@@ -703,7 +703,14 @@ export default function App() {
 
     const allTags = useMemo(() => {
         const counts = {};
-        links.forEach(link => {
+
+        // Items matching all currently selected tags
+        const baseLinks = links.filter(link =>
+            Array.from(selectedTags).every(st => link.tags && link.tags.includes(st))
+        );
+
+        // Count tags only within the baseLinks set (Faceted Search)
+        baseLinks.forEach(link => {
             if (link.tags && Array.isArray(link.tags)) {
                 link.tags.forEach(tag => {
                     counts[tag] = (counts[tag] || 0) + 1;
@@ -711,19 +718,32 @@ export default function App() {
             }
         });
 
-        const sortedTags = Object.keys(counts).sort();
+        // Ensure all unique tags from the global links array are present in counts (even if 0)
+        // to keep the filter bar stable.
+        const allUniqueTags = new Set();
+        links.forEach(link => {
+            if (link.tags && Array.isArray(link.tags)) {
+                link.tags.forEach(tag => allUniqueTags.add(tag));
+            }
+        });
+
+        const sortedTags = Array.from(allUniqueTags).sort();
         return [
             { name: 'ALL', count: links.length },
-            ...sortedTags.map(tag => ({ name: tag, count: counts[tag] }))
+            ...sortedTags.map(tag => ({ name: tag, count: counts[tag] || 0 }))
         ];
-    }, [links]);
+    }, [links, selectedTags]);
 
     const filteredLinks = useMemo(() => {
         let result = links.filter(link => {
             const matchesSearch = link.url.toLowerCase().includes(search.toLowerCase()) ||
                 link.title.toLowerCase().includes(search.toLowerCase()) ||
                 (link.tags && link.tags.some(tag => tag.toLowerCase().includes(search.toLowerCase())));
-            const matchesTags = tagFilter === 'ALL' || (link.tags && link.tags.includes(tagFilter));
+
+            // Matches all selected tags
+            const matchesTags = selectedTags.size === 0 ||
+                Array.from(selectedTags).every(st => link.tags && link.tags.includes(st));
+
             return matchesSearch && matchesTags;
         });
 
@@ -983,10 +1003,21 @@ export default function App() {
                     {allTags.slice(0, 6).map(tag => (
                         <button
                             key={tag.name}
-                            onClick={() => setTagFilter(tag.name)}
+                            onClick={() => {
+                                if (tag.name === 'ALL') {
+                                    setSelectedTags(new Set());
+                                } else {
+                                    setSelectedTags(prev => {
+                                        const next = new Set(prev);
+                                        if (next.has(tag.name)) next.delete(tag.name);
+                                        else next.add(tag.name);
+                                        return next;
+                                    });
+                                }
+                            }}
                             className={cn(
                                 "px-4 py-1.5 rounded-full text-sm font-medium transition-all whitespace-nowrap flex items-center gap-2",
-                                tagFilter === tag.name
+                                (tag.name === 'ALL' ? selectedTags.size === 0 : selectedTags.has(tag.name))
                                     ? "bg-white text-black shadow-lg"
                                     : "bg-zinc-900 text-zinc-400 border border-zinc-800 hover:bg-zinc-800"
                             )}
@@ -994,7 +1025,7 @@ export default function App() {
                             {tag.name === 'ALL' ? t('allProducts') : tag.name}
                             <span className={cn(
                                 "text-[10px] opacity-70",
-                                tagFilter === tag.name ? "text-black/60" : "text-zinc-600"
+                                (tag.name === 'ALL' ? selectedTags.size === 0 : selectedTags.has(tag.name)) ? "text-black/60" : "text-zinc-600"
                             )}>{tag.count}</span>
                         </button>
                     ))}
@@ -1005,7 +1036,7 @@ export default function App() {
                                 onClick={() => setMoreTagsOpen(!moreTagsOpen)}
                                 className={cn(
                                     "px-4 py-1.5 rounded-full text-sm font-medium transition-all flex items-center gap-2",
-                                    allTags.slice(6).some(t => t.name === tagFilter)
+                                    allTags.slice(6).some(t => selectedTags.has(t.name))
                                         ? "bg-white text-black"
                                         : "bg-zinc-900 text-zinc-400 border border-zinc-800 hover:bg-zinc-800"
                                 )}
@@ -1026,10 +1057,17 @@ export default function App() {
                                         {allTags.slice(6).map(tag => (
                                             <button
                                                 key={tag.name}
-                                                onClick={() => { setTagFilter(tag.name); setMoreTagsOpen(false); }}
+                                                onClick={() => {
+                                                    setSelectedTags(prev => {
+                                                        const next = new Set(prev);
+                                                        if (next.has(tag.name)) next.delete(tag.name);
+                                                        else next.add(tag.name);
+                                                        return next;
+                                                    });
+                                                }}
                                                 className={cn(
                                                     "px-3 py-1.5 rounded-lg text-xs font-medium text-left truncate transition-colors flex items-center justify-between",
-                                                    tagFilter === tag.name ? "bg-white text-black" : "hover:bg-zinc-800 text-zinc-400"
+                                                    selectedTags.has(tag.name) ? "bg-white text-black" : "hover:bg-zinc-800 text-zinc-400"
                                                 )}
                                             >
                                                 <span className="truncate">{tag.name}</span>
@@ -1194,8 +1232,20 @@ export default function App() {
                                                                 link.tags.map(tag => (
                                                                     <button
                                                                         key={tag}
-                                                                        onClick={() => setTagFilter(tag)}
-                                                                        className="text-[9px] bg-zinc-800 px-1.5 py-0.5 rounded text-zinc-400 border border-zinc-700 hover:border-zinc-500 transition-colors"
+                                                                        onClick={() => {
+                                                                            setSelectedTags(prev => {
+                                                                                const next = new Set(prev);
+                                                                                if (next.has(tag)) next.delete(tag);
+                                                                                else next.add(tag);
+                                                                                return next;
+                                                                            });
+                                                                        }}
+                                                                        className={cn(
+                                                                            "text-[9px] px-1.5 py-0.5 rounded border transition-colors",
+                                                                            selectedTags.has(tag)
+                                                                                ? "bg-white text-black border-white"
+                                                                                : "bg-zinc-800 text-zinc-400 border-zinc-700 hover:border-zinc-500"
+                                                                        )}
                                                                     >
                                                                         {tag}
                                                                     </button>
