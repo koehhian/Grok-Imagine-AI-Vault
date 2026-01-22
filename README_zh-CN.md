@@ -55,6 +55,19 @@
    ```
 4. 在浏览器打开 [http://localhost:5179](http://localhost:5179)。
 
+
+## 💎 进阶神器：Grok Link Detector
+
+如何有效率获取 `grok.com/imagine` 链接：
+
+1.  **安装 Tampermonkey**：浏览器油猴插件。
+2.  **建立脚本**：建立新脚本，並貼入 [`grok-detector.js`](grok-detector.js) 的内容。
+3.  **自动捕捉**：在 Grok 页面滚动，右下角会显示捕捉数量。
+4.  **同步入库**：点击 **"Copy for Vault"**，然后在您的 Vault 中使用“导入 (Import)”功能即可。
+
+---
+🚀 祝您的 AI 创作库日益壮大！
+
 ## 授权 (License)
 
 本道目采用 **GNU GPL v3** 开源授权。详情请见 [LICENSE](https://www.gnu.org/licenses/gpl-3.0.html)。
