@@ -694,7 +694,7 @@ export default function App() {
                             animate={{ opacity: 1, x: 0 }}
                             className="flex items-center gap-3"
                         >
-                            <img src="/logo-sm.png" alt="Logo" className="w-10 h-10 object-contain" />
+                            <img src="logo-sm.png" alt="Logo" className="w-10 h-10 object-contain" />
                             <div>
                                 <h1 className="text-4xl font-bold tracking-tight text-white flex items-center gap-3">
                                     {t('title')}
