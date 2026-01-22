@@ -57,6 +57,18 @@
 
 ## 授權 (License)
 
+## 💎 進階神器：Grok Link Detector
+
+如何有效率獲取 `grok.com/imagine` 連結：
+
+1.  **安裝 Tampermonkey**：瀏覽器油猴插件。
+2.  **建立腳本**：建立新腳本，並貼入 [`grok-detector.js`](grok-detector.js) 的內容。
+3.  **自動捕捉**：在 Grok 頁面滾動，右下角會顯示捕捉數量。
+4.  **同步入庫**：點擊 **"Copy for Vault"**，然後在您的 Vault 中使用「導入 (Import)」功能即可。
+
+---
+🚀 祝您的 AI 創作庫日益壯大！
+
 本專案採用 **GNU GPL v3** 開源授權。詳情請見 [LICENSE](https://www.gnu.org/licenses/gpl-3.0.html)。
 
 ## 請我喝杯咖啡 (Buy Me a Coffee)

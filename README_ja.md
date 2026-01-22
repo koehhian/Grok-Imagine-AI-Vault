@@ -57,6 +57,18 @@ Grokのために特別に設計された、AI生成画像をエレガントか�
 
 ## ライセンス
 
+## 💎 高度なツール：Grok Link Detector
+
+`grok.com/imagine` からリンクを効率的に取得する方法：
+
+1.  **Tampermonkey をインストール**：ブラウザ用のユーザースクリプト拡張機能。
+2.  **スクリプトの追加**：新しいスクリプトを作成し、[`grok-detector.js`](grok-detector.js) の内容を貼り付けます。
+3.  **自動キャプチャ**：Grok のギャラリーをスクロールすると、検出器が自動的にリンクをキャプチャします。
+4.  **同期**：**"Copy for Vault"** をクリックし、Vault の「インポート (Import)」機能を使用します。
+
+---
+🚀 あなたの AI 創作ライフをより豊かに！
+
 本プロジェクトは **GNU GPL v3** オープンソースライセンスの下で公開されています。詳細は [LICENSE](https://www.gnu.org/licenses/gpl-3.0.html) をご覧ください。
 
 ## Buy Me a Coffee
