@@ -384,13 +384,31 @@
     const scan = () => {
         if (!isAutoEnabled) return;
         const currentLinks = new Set(capturedLinks);
+
+        // Pass 1: Standard Gallery Cards
         const CARD_SELECTOR = '[role="listitem"]';
         document.querySelectorAll(CARD_SELECTOR).forEach(c => {
             const u = extractPostUrl(c);
             if (u && !currentLinks.has(u)) {
                 capturedLinks.push(u);
+                currentLinks.add(u);
             }
         });
+
+        // Pass 2: Deep Scan (Images & Videos) for Detail Pages / Batches
+        const mediaElements = document.querySelectorAll('img[src*="imagine-public"], video[src*="imagine-public"], video[poster*="imagine-public"]');
+        mediaElements.forEach(m => {
+            const src = m.src || m.getAttribute('poster') || "";
+            const idMatch = src.match(/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i);
+            if (idMatch) {
+                const u = `https://grok.com/imagine/post/${idMatch[1]}`;
+                if (!currentLinks.has(u)) {
+                    capturedLinks.push(u);
+                    currentLinks.add(u);
+                }
+            }
+        });
+
         updateUI();
     };
 

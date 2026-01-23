@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## [1.0.4] - 2026-01-23
+
+### Added
+- **Vault Helper Extension**: "Deep Scan" feature. The extension now automatically captures all media (images/videos) from Grok detail pages and batch generations by detecting CDN UUIDs.
+
 ## [1.0.3] - 2026-01-23
 
 ### Added
