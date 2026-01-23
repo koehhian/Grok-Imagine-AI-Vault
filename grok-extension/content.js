@@ -144,7 +144,7 @@
                 <span>⠿</span>
             </div>
 
-            <div class="grok-section-title" id="sec-auto">== ${t.secAuto} ==</div>
+            <div class="grok-section-title" id="sec-auto">${t.secAuto}</div>
             <div class="grok-toggle-row">
                 <span id="label-auto">${t.labelAuto}</span>
                 <label class="grok-toggle-switch">
@@ -158,7 +158,7 @@
             </div>
             <button id="grok-copy-all" class="grok-btn btn-secondary">${t.btnCopyAll}</button>
 
-            <div class="grok-section-title" id="sec-range">== ${t.secRange} ==</div>
+            <div class="grok-section-title" id="sec-range">${t.secRange}</div>
             <div class="grok-range-group">
                 <span>${t.rangePre}</span>
                 <input type="number" id="grok-range-start" class="grok-range-input" value="1" min="1">
@@ -170,7 +170,7 @@
             </div>
             <button id="grok-copy-range" class="grok-btn btn-range">${t.btnCopyRange}</button>
 
-            <div class="grok-section-title" id="sec-manual">== ${t.secManual} ==</div>
+            <div class="grok-section-title" id="sec-manual">${t.secManual}</div>
             <div class="grok-stat-row">
                 <span id="label-sel">${t.labelSel}</span>
                 <div class="grok-sel-val-group">
