@@ -8,6 +8,8 @@
 
 一个专门为 [Grok.com](https://grok.com/imagine) 打造的优雅图卡管理工具，让你轻松收藏、分类与备份所有的 AI 作品。
 
+[**🌐 线上点选体验 (Live Demo)**](https://grok-imagine-ai-vault.vercel.app/) — 直接看看它的样子！
+
 ---
 
 ### 🚀 快速上手 (三分钟搞定)

@@ -8,6 +8,8 @@
 
 An elegant management tool designed for [Grok.com](https://grok.com/imagine), allowing you to collect, categorize, and backup all your AI-generated works effortlessly.
 
+[**🌐 Live Demo**](https://grok-imagine-ai-vault.vercel.app/) — See it in action!
+
 ---
 
 ### 🚀 Quick Start (3-Minute Setup)

@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## [1.0.3] - 2026-01-23
+
+### Added
+- **Documentation**: Added Live Demo links to all localized READMEs.
+
 ## [1.0.2] - 2026-01-23
 
 ### Added

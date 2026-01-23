@@ -8,6 +8,8 @@
 
 [Grok.com](https://grok.com/imagine) のために作られた、AI 生成作品をエレガントに保存・管理・バックアップするためのツールです。
 
+[**🌐 ライブデモ (Live Demo)**](https://grok-imagine-ai-vault.vercel.app/) — 実際の動作を確認できます！
+
 ---
 
 ### 🚀 クイックスタート (3分で完了)
