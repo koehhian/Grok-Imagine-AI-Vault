@@ -1,0 +1,349 @@
+/* Floating Panel Container */
+#grok-vault-panel {
+    position: fixed !important;
+    z-index: 2147483647 !important;
+    background: #0f172a !important;
+    color: #f8fafc !important;
+    padding: 16px !important;
+    border-radius: 16px !important;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+    border: 1px solid #334155 !important;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
+    width: 220px !important;
+    user-select: none !important;
+    cursor: default !important;
+    display: block !important;
+    visibility: visible !important;
+}
+
+/* Drag Handle */
+.grok-drag-handle {
+    cursor: move !important;
+    padding-bottom: 8px !important;
+    margin-bottom: 12px !important;
+    border-bottom: 1px solid #334155 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+}
+
+.grok-header-left {
+    position: relative !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+}
+
+.grok-lang-btn {
+    background: none !important;
+    border: none !important;
+    color: #94a3b8 !important;
+    cursor: pointer !important;
+    padding: 4px !important;
+    display: flex !important;
+    align-items: center !important;
+    font-size: 16px !important;
+    border-radius: 4px !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    z-index: 10 !important;
+}
+
+.grok-lang-btn.active {
+    color: #60a5fa !important;
+    transform: scale(1.2) rotate(15deg) !important;
+}
+
+/* Fan-out Menu Items */
+.grok-lang-item {
+    position: absolute !important;
+    left: 4px !important;
+    top: 4px !important;
+    width: 28px !important;
+    height: 28px !important;
+    background: #1e293b !important;
+    border: 1px solid #334155 !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 12px !important;
+    cursor: pointer !important;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    z-index: 5 !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5) !important;
+    color: #f8fafc !important;
+}
+
+.grok-lang-item:hover {
+    background: #3b82f6 !important;
+    border-color: #60a5fa !important;
+    transform: translate(var(--tx), var(--ty)) scale(1.2) !important;
+    z-index: 15 !important;
+}
+
+/* Fan-out positions (Arc from Top-Left to Bottom-Left) */
+.grok-lang-menu-open .grok-lang-item {
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+}
+
+.grok-lang-menu-open .grok-lang-item:nth-child(2) {
+    --tx: 45px;
+    --ty: -15px;
+    transform: translate(var(--tx), var(--ty)) !important;
+    transition-delay: 0.05s;
+}
+
+.grok-lang-menu-open .grok-lang-item:nth-child(3) {
+    --tx: 55px;
+    --ty: 20px;
+    transform: translate(var(--tx), var(--ty)) !important;
+    transition-delay: 0.1s;
+}
+
+.grok-lang-menu-open .grok-lang-item:nth-child(4) {
+    --tx: 45px;
+    --ty: 55px;
+    transform: translate(var(--tx), var(--ty)) !important;
+    transition-delay: 0.15s;
+}
+
+.grok-lang-menu-open .grok-lang-item:nth-child(5) {
+    --tx: 10px;
+    --ty: 80px;
+    transform: translate(var(--tx), var(--ty)) !important;
+    transition-delay: 0.2s;
+}
+
+.grok-drag-handle span:first-child {
+    font-weight: 900 !important;
+    font-size: 12px !important;
+    color: #94a3b8 !important;
+    letter-spacing: 1px !important;
+}
+
+/* Section Styling */
+.grok-section-title {
+    font-size: 11px !important;
+    font-weight: 800 !important;
+    color: #94a3b8 !important;
+    margin-bottom: 10px !important;
+    margin-top: 16px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1px !important;
+    text-align: center !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    border-radius: 4px !important;
+    padding: 2px 0 !important;
+}
+
+/* iOS Toggle Style */
+.grok-toggle-row {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    margin-bottom: 8px !important;
+}
+
+.grok-toggle-switch {
+    position: relative !important;
+    display: inline-block !important;
+    width: 40px !important;
+    height: 22px !important;
+}
+
+.grok-toggle-switch input {
+    opacity: 0 !important;
+    width: 0 !important;
+    height: 0 !important;
+}
+
+.grok-toggle-slider {
+    position: absolute !important;
+    cursor: pointer !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    background-color: #334155 !important;
+    transition: .3s !important;
+    border-radius: 22px !important;
+}
+
+.grok-toggle-slider:before {
+    position: absolute !important;
+    content: "" !important;
+    height: 18px !important;
+    width: 18px !important;
+    left: 2px !important;
+    bottom: 2px !important;
+    background-color: white !important;
+    transition: .3s !important;
+    border-radius: 50% !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4) !important;
+}
+
+input:checked+.grok-toggle-slider {
+    background-color: #10b981 !important;
+    /* iOS Green */
+}
+
+input:checked+.grok-toggle-slider:before {
+    transform: translateX(18px) !important;
+}
+
+/* Range Input Group */
+.grok-range-group {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 4px !important;
+    margin-top: 8px !important;
+    font-size: 11px !important;
+    color: #94a3b8 !important;
+}
+
+.grok-range-input {
+    width: 45px !important;
+    background: #1e293b !important;
+    border: 1px solid #334155 !important;
+    color: white !important;
+    padding: 4px !important;
+    border-radius: 6px !important;
+    font-size: 12px !important;
+    text-align: center !important;
+}
+
+.grok-range-input:focus {
+    outline: none !important;
+    border-color: #3b82f6 !important;
+}
+
+.grok-range-sep {
+    color: #64748b !important;
+    font-weight: 900 !important;
+}
+
+/* Stats and Buttons */
+.grok-stat-row {
+    display: flex !important;
+    justify-content: space-between !important;
+    margin-bottom: 8px !important;
+    font-size: 13px !important;
+}
+
+.grok-stat-val {
+    font-weight: 900 !important;
+    color: #60a5fa !important;
+}
+
+.grok-sel-val-group {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+}
+
+.grok-btn-clear {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border: none !important;
+    color: #94a3b8 !important;
+    cursor: pointer !important;
+    font-size: 9px !important;
+    padding: 2px 6px !important;
+    border-radius: 4px !important;
+    font-weight: 700 !important;
+    transition: all 0.2s !important;
+}
+
+.grok-btn-clear:hover {
+    background: #334155 !important;
+    color: #f8fafc !important;
+}
+
+.grok-btn {
+    display: block !important;
+    width: 100% !important;
+    padding: 8px !important;
+    border-radius: 8px !important;
+    border: none !important;
+    cursor: pointer !important;
+    font-weight: 700 !important;
+    font-size: 12px !important;
+    margin-top: 8px !important;
+    text-align: center !important;
+    transition: all 0.2s !important;
+}
+
+.grok-btn:active {
+    transform: scale(0.97) !important;
+}
+
+.btn-primary {
+    background: #3b82f6 !important;
+    color: white !important;
+}
+
+.btn-like {
+    background: transparent !important;
+    border: 1px solid #ef4444 !important;
+    color: #ef4444 !important;
+}
+
+.btn-like:hover {
+    background: #ef4444 !important;
+    color: white !important;
+}
+
+.grok-manual-btns {
+    display: flex !important;
+    gap: 8px !important;
+    margin-top: 8px !important;
+}
+
+.grok-manual-btns .grok-btn {
+    flex: 1 !important;
+    margin-top: 0 !important;
+}
+
+.btn-secondary {
+    background: #1e293b !important;
+    color: #94a3b8 !important;
+    border: 1px solid #334155 !important;
+}
+
+.btn-range {
+    background: #6366f1 !important;
+    /* Indigo for range */
+    color: white !important;
+    margin-top: 10px !important;
+}
+
+.grok-helper-hint {
+    font-size: 10px !important;
+    color: #475569 !important;
+    margin-top: 12px !important;
+    text-align: center !important;
+}
+
+/* High Contrast Card Highlight */
+.grok-selected-card {
+    outline: 6px solid #00f2ff !important;
+    outline-offset: -6px !important;
+    border-radius: 20px !important;
+    box-shadow: 0 0 30px #00f2ff !important;
+    z-index: 50 !important;
+    filter: brightness(1.1) !important;
+}
+
+/* Lasso Box */
+.grok-lasso-selection {
+    position: absolute !important;
+    border: 2px solid #00f2ff !important;
+    background: rgba(0, 242, 255, 0.15) !important;
+    z-index: 2147483646 !important;
+    pointer-events: none !important;
+}

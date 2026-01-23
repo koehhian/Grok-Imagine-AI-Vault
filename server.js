@@ -15,8 +15,15 @@ const DATA_FILE = path.join(__dirname, 'data', 'links.json');
 app.use(cors());
 app.use(bodyParser.json({ limit: '50mb' }));
 
+// Serve thumbnails directory
+app.use('/thumbnails', express.static(path.join(__dirname, 'data', 'thumbnails')));
+
 if (!fs.existsSync(path.join(__dirname, 'data'))) {
     fs.mkdirSync(path.join(__dirname, 'data'));
+}
+
+if (!fs.existsSync(path.join(__dirname, 'data', 'thumbnails'))) {
+    fs.mkdirSync(path.join(__dirname, 'data', 'thumbnails'));
 }
 
 if (!fs.existsSync(DATA_FILE)) {
@@ -241,6 +248,39 @@ app.post('/api/tags/delete', (req, res) => {
     res.json({ success: true, changed });
 });
 
+// Local Thumbnail Backup logic
+const downloadImage = async (url, photoId) => {
+    const dest = path.join(__dirname, 'data', 'thumbnails', `${photoId}.jpg`);
+    if (fs.existsSync(dest)) return `/thumbnails/${photoId}.jpg`;
+
+    try {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`Failed to fetch image: ${response.statusText}`);
+        const buffer = await response.arrayBuffer();
+        fs.writeFileSync(dest, Buffer.from(buffer));
+        console.log(`[Backup] Saved: ${photoId}.jpg`);
+        return `/thumbnails/${photoId}.jpg`;
+    } catch (err) {
+        console.error(`[Backup] Error downloading ${url}:`, err.message);
+        return null;
+    }
+};
+
+app.post('/api/backup-thumbnail', async (req, res) => {
+    const { id, url } = req.body;
+    if (!id || !url) return res.status(400).json({ error: 'ID and URL required' });
+
+    const localUrl = await downloadImage(url, id);
+    if (localUrl) {
+        // Update local JSON
+        let data = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
+        data = data.map(link => link.id === id ? { ...link, thumbnail: localUrl } : link);
+        fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
+        res.json({ success: true, localUrl });
+    } else {
+        res.status(500).json({ error: 'Failed to download image' });
+    }
+});
 
 
 app.listen(PORT, () => {

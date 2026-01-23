@@ -6,79 +6,82 @@
 
 **English** | [繁體中文](README_zh-TW.md) | [简体中文](README_zh-CN.md) | [日本語](README_ja.md)
 
-<div align="center">
-  <img src="public/preview.png" alt="App Preview" width="100%" style="border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);" />
-</div>
-
-An elegant repository for managing and organizing your AI-generated images, specifically optimized for Grok.
-
-## 💎 Advanced Tool: Grok Link Detector
-
-To efficiently capture links from `grok.com/imagine`:
-
-1.  **Install Tampermonkey**: A browser extension for userscripts.
-2.  **Add Script**: Create a new script and paste the content of [`grok-detector.js`](grok-detector.js).
-3.  **Capture**: Scroll through Grok's gallery; the detector will automatically capture links.
-4.  **Sync**: Click **"Copy for Vault"** and then use the **"Import"** function in your AI Vault.
+An elegant management tool designed for [Grok.com](https://grok.com/imagine), allowing you to collect, categorize, and backup all your AI-generated works effortlessly.
 
 ---
-🚀 Happy Archiving!
 
-## Features
+### 🚀 Quick Start (3-Minute Setup)
 
-- **Comprehensive Grok Link Support**: Support for `post`, `video`, `share`, and direct `imagine-public` image links.
-- **Auto-Thumbnail & UUID Extraction**: Automatically extracts UUIDs from various Grok link formats to generate .jpg thumbnails.
-- **CDN-to-Post Magic**: Dragging a Grok CDN image link automatically converts it to a canonical Grok post URL while keeping the image as a high-quality thumbnail.
-- **Robust Drag-and-Drop**: Intelligent filtering of Base64 data and improved compatibility across different browsers and drop sources.
-- **Data Portability**: Easily Export and Import your entire vault data (JSON) for simple device switching.
-- **Multi-Tag System**: Organize images with multiple categories; filter by tags with a custom dropdown.
-- **Grok-Style UI**: A minimal, high-contrast dark mode aesthetic with a **Sticky Header** for easy navigation.
-- **Batch Operations**: Support for multi-selection, bulk deletion, and tag organization. Bulk add supports newlines, commas, and spaces.
-- **Privacy First**: Built-in privacy blur toggle for discrete browsing.
+1.  **Install Helper**: Load the `grok-extension` folder into Chrome Developer Mode ([Installation Guide](extension_newbie.md)).
+2.  **Capture Images**: Click "COPY ALL" on the helper panel in Grok, or use `Shift + Drag` to select images.
+3.  **Start Local**: Run `node server.js` and `npm run dev` ([Terminal User Guide](terminal_newbie.md)).
+4.  **Paste & Save**: Press `Ctrl/Cmd + V` on the Vault web page, and you're done!
 
-## Usage Tips
+---
 
-### Grok Thumbnails
-For the best experience with Grok Imagine links:
-> [!IMPORTANT]
-> **Static Image Requirement**: When copying a public post link from Grok, ensure you are viewing a **static image**. If you copy a link while the image is still generating or in a dynamic view, the thumbnail derivation may fail.
+<div align="center">
+  <img src="public/preview_en.png" alt="App Preview" width="100%" style="border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);" />
+</div>
 
-### Manual Video Thumbnails
-Currently, videos (including image links that have already been made into videos) do not support automatic thumbnails and need to be added manually. The method is simple:
-1. Click the icon popup on the card to open the Grok page.
-2. Manually switch from **Video** to **Image** in Grok.
-3. Drag the preview image back to the **Grok Imagine AI Vault** card to add the thumbnail.
+## ✨ Key Features
 
-### Batch Upload
-You can paste multiple links in the bulk add field. It supports separators like **newlines**, **commas**, or **spaces**. You can also specify tags for the entire batch at once.
+-   **Immersive Web Interface**: Beautifully browse your Grok creations with dark mode and masonry layout. Supports multi-select, batch delete, and tag management.
+-   **Smart Information Extraction**: Automatically extracts the original Grok ID from dragged images or complex pasted data, keeping your library clean.
+-   **Automatic Local Backup**: When the server is running, the system automatically downloads remote images to your local `backups/` folder, preventing link expiration.
+-   **Privacy & Aesthetics**: Features "Privacy Blur" mode, immersive Picture-in-Picture preview, and a robust tagging system.
+-   **Vault Helper (Extension)**: Enhances your browsing with auto-detection, range export, lasso selection, and a "Batch Like" feature to preserve link persistence.
 
-### Export/Import
-Use the **Export** ![export](assets/export.png) and **Import** ![import](assets/import.png) buttons in the header to backup your data or transfer it to another Vault instance.
+## 💡 Pro Tip: How to keep your images forever?
 
-## Tech Stack
+> [!TIP]
+> **Highly recommended**: ALWAYS **"Like" (❤️)** your favorite images on Grok.com.
+> This associates the images with your account metadata, significantly reducing the risk of links becoming inaccessible. You can use the "❤️ LIKE BATCH" button in the Vault Helper to do this quickly.
 
-- **Frontend**: React, TailwindCSS, Framer Motion, Lucide Icons.
-- **Backend**: Node.js, Express.
-- **Storage**: JSON-based flat file system (`data/links.json`).
+## 🛠️ How to Add Items?
 
-## Getting Started
+1.  **Bulk Paste**: Paste one or more Grok Imagine links directly into the Vault interface (separated by newline, comma, or space).
+    *   Examples:
+        ```text
+        https://grok.com/imagine/post/e8910ae5-f4e5-42d4-ae10-b5852027ae69
+        https://grok.com/imagine/post/946bef9e-8884-4960-856e-336ae977ad97
+        ```
+2.  **Drag & Drop**: Simply drag images from Grok.com or your local folder into the Vault; the system will automatically recognize them.
+3.  **Vault Helper (Recommended)**: Install the [grok-extension](grok-extension/) for the most seamless capture experience.
 
-1. Clone the repository.
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Start the application:
-   ```bash
-   node server.js & npm run dev
-   ```
-4. Open [http://localhost:5179](http://localhost:5179) in your browser.
+<div align="center">
+  <img src="public/extension_en.png" alt="Extension Screenshot" width="80%" style="border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);" />
+</div>
+
+## 🚀 Getting Started
+
+1.  **Requirement**: Ensure you have [Node.js](https://nodejs.org/) installed.
+2.  **Installation**:
+    ```bash
+    git clone https://github.com/koehhian/Grok-Imagine-AI-Vault.git
+    cd Grok-Imagine-AI-Vault
+    npm install
+    ```
+3.  **Running**: Launch `node server.js` (Backup/Backend) and `npm run dev` (Frontend).
+
+---
+
+## 📸 Media Production Guide
+
+To make your showcase posts pop, record these 4 key clips:
+1.  **The Smooth Workflow**: Drag a Grok image into the Vault and show it instantly appearing.
+2.  **The Lasso Drag**: Hold `Shift` and circle a group of images to show the cyan selection.
+3.  **Instant Capture**: Scroll the Grok gallery and show the counter in the helper panel going up.
+4.  **The Organized Vault**: A quick scroll of your finished, tagged gallery in the main web app.
+
+---
+
+> **Not familiar with the Terminal?** Check out the [💻 Terminal Beginner Guide](terminal_newbie.md)
+> **Need help installing the extension?** Check out the [🧩 Extension Installation Guide](extension_newbie.md)
 
 ## License
 
-This project is licensed under the **GNU GPL v3**. See the [LICENSE](https://www.gnu.org/licenses/gpl-3.0.html) for details.
+This project is licensed under the **GNU GPL v3**. See [LICENSE](https://www.gnu.org/licenses/gpl-3.0.html) for details.
 
 ## Buy Me a Coffee
 
-If you find this tool helpful and want to support its development, feel free to buy me a coffee!
-[Donation link](https://buymeacoffee.com/koehhian)
+If you find this tool useful, feel free to buy me a coffee!

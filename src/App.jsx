@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
-import { Search, Plus, ExternalLink, RefreshCw, Trash2, Image as ImageIcon, Languages, Globe, Tag, Check, CheckSquare, X, ChevronDown, MoreHorizontal, Edit2, Download, Upload, ArrowUpDown, Settings } from 'lucide-react';
+import { Search, Plus, ExternalLink, RefreshCw, Trash2, Image as ImageIcon, Languages, Globe, Tag, Check, CheckSquare, X, ChevronDown, MoreHorizontal, Edit2, Download, Upload, ArrowUpDown, Settings, Maximize2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -150,11 +150,15 @@ const api = {
     },
     getExportUrl: () => {
         if (IS_DEMO) {
-            const stored = localStorage.getItem('grok_vault_links_v1_1') || '[]';
+            const stored = localStorage.getItem('grok_vault_links_v1_4') || '[]';
             const blob = new Blob([stored], { type: 'application/json' });
             return URL.createObjectURL(blob);
         }
         return `${API_URL}/links/export`;
+    },
+    backupThumbnail: async (id, url) => {
+        if (IS_DEMO) return { data: { success: false, error: 'Backup not supported in demo' } };
+        return axios.post(`${API_URL}/backup-thumbnail`, { id, url });
     }
 };
 
@@ -202,7 +206,15 @@ const TRANSLATIONS = {
         globalDeleteConfirm: 'Are you sure you want to delete tag "{tag}" from all items?',
         exportSuccess: 'Data exported to your browser\'s default download path.',
         selectAll: 'Select All',
-        deselectAll: 'Deselect All'
+        deselectAll: 'Deselect All',
+        settings: 'Settings',
+        localBackup: 'Local Image Backup',
+        defaultBlur: 'Default Privacy Blur',
+        backupAll: 'Backup All Existing Images',
+        backupAllDesc: 'Download all CDN images to your local storage',
+        localBackupDesc: 'Automatically download thumbnails to local storage',
+        defaultBlurDesc: 'Always start with privacy blur enabled',
+        pipPreview: 'Mini Preview'
     },
     'zh-cn': {
         title: 'Grok Imagine AI Vault',
@@ -219,7 +231,7 @@ const TRANSLATIONS = {
         bulkDelete: '批量刪除',
         cancel: '取消',
         getThumbnail: '获取缩略图',
-        grokHelperTitle: 'Grok 助手已开启',
+        grokHelperTitle: 'Vault 助手已开启',
         grokHelperDesc: '由于 Grok 的安全限制，我們已为您在新窗口中打开页面。',
         grokHelperSteps: [
             '在弹出的窗口中完成验证',
@@ -247,7 +259,14 @@ const TRANSLATIONS = {
         globalDeleteConfirm: '确定要从所有项目中删除标签 "{tag}" 吗？',
         exportSuccess: '数据已导出至浏览器默认下载路径。',
         selectAll: '全选',
-        deselectAll: '取消全选'
+        deselectAll: '取消全选',
+        settings: '设置',
+        localBackup: '图片本地备份',
+        defaultBlur: '默认隐私模糊',
+        backupAll: '备份所有现有图片',
+        backupAllDesc: '将所有 CDN 图片下载到您的本地存储',
+        localBackupDesc: '自动下载缩略图到本地存储',
+        defaultBlurDesc: '启动时默认开启隐私模糊'
     },
     'zh-tw': {
         title: 'Grok Imagine AI Vault',
@@ -264,7 +283,7 @@ const TRANSLATIONS = {
         bulkDelete: '批量刪除',
         cancel: '取消',
         getThumbnail: '獲取縮圖',
-        grokHelperTitle: 'Grok 助手已開啟',
+        grokHelperTitle: 'Vault 助手已開啟',
         grokHelperDesc: '由於 Grok 的安全限制，我們已為你在新視窗中打開頁面。',
         grokHelperSteps: [
             '在彈出的視窗中完成驗證',
@@ -292,7 +311,14 @@ const TRANSLATIONS = {
         globalDeleteConfirm: '確定要從所有項目中刪除標籤「{tag}」嗎？',
         exportSuccess: '資料已匯出至瀏覽器預設的下載路徑。',
         selectAll: '全選',
-        deselectAll: '取消全選'
+        deselectAll: '取消全選',
+        settings: '設置',
+        localBackup: '圖片本地備份',
+        defaultBlur: '預設隱私模糊',
+        backupAll: '備份所有現有圖片',
+        backupAllDesc: '將所有 CDN 圖片下載到您的本地存儲',
+        localBackupDesc: '自動下載縮圖到本地存儲',
+        defaultBlurDesc: '啟動時預設開啟隱私模糊'
     },
     'ja': {
         title: 'Grok Imagine AI Vault',
@@ -337,7 +363,15 @@ const TRANSLATIONS = {
         globalDeleteConfirm: 'すべての項目からタグ「{tag}」を削除してもよろしいですか？',
         exportSuccess: 'データはブラウザのデフォルトの保存先にエクスポートされました。',
         selectAll: 'すべて選択',
-        deselectAll: '選択解除'
+        deselectAll: '選択解除',
+        settings: '設定',
+        localBackup: '画像のローカルバックアップ',
+        defaultBlur: 'デフォルトのプライバシーぼかし',
+        backupAll: '既存のすべての画像をバックアップ',
+        backupAllDesc: 'すべてのCDN画像をローカルストレージにダウンロードします',
+        localBackupDesc: 'サムネイルをローカルストレージに自動保存',
+        defaultBlurDesc: '起動時にプライバシーぼかしを有効にする',
+        pipPreview: 'ミニプレビュー'
     }
 };
 
@@ -367,6 +401,37 @@ export default function App() {
         });
         return text;
     };
+
+    // Settings State
+    const [settingsOpen, setSettingsOpen] = useState(false);
+    const [backupEnabled, setBackupEnabled] = useState(() => {
+        return localStorage.getItem('grok_vault_backup_enabled') === 'true';
+    });
+    const [defaultBlurEnabled, setDefaultBlurEnabled] = useState(() => {
+        return localStorage.getItem('grok_vault_default_blur_enabled') !== 'false'; // Default to true
+    });
+
+    useEffect(() => {
+        localStorage.setItem('grok_vault_backup_enabled', backupEnabled);
+    }, [backupEnabled]);
+
+    useEffect(() => {
+        localStorage.setItem('grok_vault_default_blur_enabled', defaultBlurEnabled);
+    }, [defaultBlurEnabled]);
+
+    useEffect(() => {
+        // Initialize blur state based on defaultBlurEnabled preference
+        const lastBlur = localStorage.getItem('grok_vault_last_blur_state');
+        if (!defaultBlurEnabled) {
+            setIsBlurred(lastBlur === 'true');
+        } else {
+            setIsBlurred(true);
+        }
+    }, [defaultBlurEnabled]);
+
+    useEffect(() => {
+        localStorage.setItem('grok_vault_last_blur_state', isBlurred);
+    }, [isBlurred]);
 
 
 
@@ -447,8 +512,17 @@ export default function App() {
                 const thumbnail = deriveGrokThumbnail(url);
                 const response = await api.addLink(url, tagArray);
                 if (thumbnail) {
-                    await api.updateLink(response.data.id, { thumbnail });
-                    response.data.thumbnail = thumbnail;
+                    let finalThumbnail = thumbnail;
+                    if (backupEnabled && !IS_DEMO) {
+                        try {
+                            const backupRes = await api.backupThumbnail(response.data.id, thumbnail);
+                            if (backupRes.data.success) finalThumbnail = backupRes.data.localUrl;
+                        } catch (err) {
+                            console.error('Backup failed:', err);
+                        }
+                    }
+                    await api.updateLink(response.data.id, { thumbnail: finalThumbnail });
+                    response.data.thumbnail = finalThumbnail;
                 }
                 setLinks([response.data, ...links]);
             } else {
@@ -457,6 +531,14 @@ export default function App() {
                     thumbnail: deriveGrokThumbnail(url)
                 }));
                 const response = await api.addBulk(bulkItems, tagArray);
+
+                // If backup enabled, trigger backup for each item in background
+                if (backupEnabled && !IS_DEMO) {
+                    response.data.forEach(item => {
+                        if (item.thumbnail) api.backupThumbnail(item.id, item.thumbnail);
+                    });
+                }
+
                 setLinks([...response.data, ...links]);
             }
             setNewUrl('');
@@ -671,6 +753,14 @@ export default function App() {
         const left = window.screen.width - width - 50;
         window.open(currentUrl, `grok_${id}`, `width=${width},height=${height},left=${left},top=50`);
         console.log(`Launched external Grok window for card ${id}`);
+    };
+
+    const launchPip = (url, id) => {
+        const width = 450;
+        const height = 650;
+        const left = window.screen.width - width - 20;
+        const top = window.screen.height - height - 100;
+        window.open(url, `pip_${id}`, `width=${width},height=${height},left=${left},top=${top}`);
     };
 
     const handleHeaderDrop = async (e) => {
@@ -948,13 +1038,24 @@ export default function App() {
                                                         className={cn("w-full px-4 py-3 text-left hover:bg-zinc-800 flex items-center justify-between", sortBy === opt && "bg-zinc-800/50 text-white")}
                                                     >
                                                         <span>{t(opt)}</span>
-                                                        {sortBy === opt && <Check className="w-4 h-4 text-blue-500" />}
+                                                        {sortBy === opt && <Check className="w-4 h-4 text-blue-400" />}
                                                     </button>
                                                 ))}
                                             </motion.div>
                                         )}
                                     </AnimatePresence>
                                 </div>
+
+                                <div className="w-px h-4 bg-zinc-800 mx-1" />
+
+                                {/* Settings Toggle */}
+                                <button
+                                    onClick={() => setSettingsOpen(true)}
+                                    title={t('settings')}
+                                    className="p-2.5 hover:bg-zinc-800 rounded-xl transition-colors text-zinc-400 group"
+                                >
+                                    <Settings className="w-5 h-5 group-hover:text-blue-400 transition-colors group-hover:rotate-45 transition-transform" />
+                                </button>
                             </div>
 
                             {/* Search */}
@@ -1154,6 +1255,13 @@ export default function App() {
                                         <motion.div
                                             key={link.id}
                                             data-id={link.id}
+                                            onClick={(e) => {
+                                                if (e.shiftKey) {
+                                                    toggleSelect(link.id);
+                                                    e.preventDefault();
+                                                    e.stopPropagation();
+                                                }
+                                            }}
                                             layout
                                             initial={{ opacity: 0, scale: 0.9 }}
                                             animate={{ opacity: 1, scale: 1 }}
@@ -1173,7 +1281,7 @@ export default function App() {
                                             {/* Selection Checkbox (Visible on hover or if selected) */}
                                             <div
                                                 onClick={(e) => {
-                                                    e.stopPropagation();
+                                                    if (!e.shiftKey) e.stopPropagation();
                                                     toggleSelect(link.id);
                                                 }}
                                                 className={cn(
@@ -1200,7 +1308,7 @@ export default function App() {
                                                     <div className="flex flex-col items-center gap-3 text-slate-600">
                                                         <ImageIcon className="w-12 h-12 opacity-20" />
                                                         <button
-                                                            onClick={(e) => { e.stopPropagation(); updateThumbnail(link.id, link.url); }}
+                                                            onClick={(e) => { if (!e.shiftKey) e.stopPropagation(); updateThumbnail(link.id, link.url); }}
                                                             className="text-xs px-3 py-1.5 bg-slate-800 rounded-full hover:bg-slate-700 hover:text-slate-300 transition-colors"
                                                         >
                                                             {t('getThumbnail')}
@@ -1214,13 +1322,22 @@ export default function App() {
                                                         href={link.url}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
-                                                        onClick={(e) => e.stopPropagation()}
+                                                        title={t('openExternal')}
+                                                        onClick={(e) => { if (!e.shiftKey) e.stopPropagation(); }}
                                                         className="p-3 bg-blue-500 text-white rounded-full hover:bg-blue-400 transition-colors"
                                                     >
                                                         <ExternalLink className="w-5 h-5" />
                                                     </a>
                                                     <button
-                                                        onClick={(e) => { e.stopPropagation(); updateThumbnail(link.id, link.url); }}
+                                                        onClick={(e) => { if (!e.shiftKey) e.stopPropagation(); launchPip(link.url, link.id); }}
+                                                        title={t('pipPreview')}
+                                                        className="p-3 bg-amber-500 text-white rounded-full hover:bg-amber-400 transition-colors"
+                                                    >
+                                                        <Maximize2 className="w-5 h-5" />
+                                                    </button>
+                                                    <button
+                                                        onClick={(e) => { if (!e.shiftKey) e.stopPropagation(); updateThumbnail(link.id, link.url); }}
+                                                        title={t('relaunch')}
                                                         className="p-3 bg-slate-700 text-white rounded-full hover:bg-slate-600 transition-colors"
                                                     >
                                                         <RefreshCw className="w-5 h-5" />
@@ -1229,7 +1346,7 @@ export default function App() {
                                             </div>
 
                                             {/* Content */}
-                                            <div className="p-4" onClick={(e) => e.stopPropagation()}>
+                                            <div className="p-4" onClick={(e) => { if (!e.shiftKey) e.stopPropagation(); }}>
                                                 <div className="flex justify-between items-start gap-2">
                                                     {editingId === link.id ? (
                                                         <div className="flex items-center gap-1 w-full">
@@ -1429,58 +1546,34 @@ export default function App() {
                     )
                 }
 
-                {/* Global Tag Manager Modal */}
+                {/* Tag Manager Modal */}
                 <AnimatePresence>
                     {tagManagerOpen && (
-                        <div className="fixed inset-0 z-[300] flex items-center justify-center p-4">
-                            <motion.div
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                exit={{ opacity: 0 }}
-                                onClick={() => setTagManagerOpen(false)}
-                                className="absolute inset-0 bg-black/80 backdrop-blur-sm"
-                            />
-                            <motion.div
-                                initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                                animate={{ opacity: 1, scale: 1, y: 0 }}
-                                exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                                className="relative w-full max-w-md bg-zinc-900 border border-zinc-800 rounded-3xl shadow-3xl p-6 overflow-hidden"
-                            >
-                                <div className="flex justify-between items-center mb-6">
-                                    <h3 className="text-xl font-bold flex items-center gap-2">
-                                        <Settings className="w-5 h-5 text-blue-400" />
-                                        {t('tagManager')}
-                                    </h3>
-                                    <button onClick={() => setTagManagerOpen(false)} className="p-2 hover:bg-zinc-800 rounded-xl transition-colors">
-                                        <X className="w-5 h-5" />
-                                    </button>
-                                </div>
+                        <TagManagerModal
+                            onClose={() => setTagManagerOpen(false)}
+                            allTags={allTags}
+                            globalRenameTag={globalRenameTag}
+                            globalDeleteTag={globalDeleteTag}
+                            t={t}
+                        />
+                    )}
+                </AnimatePresence>
 
-                                <div className="max-h-[60vh] overflow-y-auto space-y-2 pr-2 custom-scrollbar">
-                                    {allTags.filter(t => t.name !== 'ALL').map(tag => (
-                                        <div key={tag.name} className="flex items-center justify-between p-3 bg-zinc-800/50 rounded-2xl hover:bg-zinc-800 transition-colors group">
-                                            <span className="font-medium text-zinc-200">{tag.name}</span>
-                                            <div className="flex gap-1 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <button
-                                                    onClick={() => globalRenameTag(tag.name)}
-                                                    className="p-2 hover:bg-blue-500/20 text-blue-400 rounded-lg transition-colors"
-                                                    title={t('renameTag')}
-                                                >
-                                                    <Edit2 className="w-4 h-4" />
-                                                </button>
-                                                <button
-                                                    onClick={() => globalDeleteTag(tag.name)}
-                                                    className="p-2 hover:bg-red-500/20 text-red-400 rounded-lg transition-colors"
-                                                    title={t('deleteTag')}
-                                                >
-                                                    <Trash2 className="w-4 h-4" />
-                                                </button>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </motion.div>
-                        </div>
+                {/* Settings Modal */}
+                <AnimatePresence>
+                    {settingsOpen && (
+                        <SettingsModal
+                            onClose={() => setSettingsOpen(false)}
+                            links={links}
+                            setLinks={setLinks}
+                            backupEnabled={backupEnabled}
+                            setBackupEnabled={setBackupEnabled}
+                            defaultBlurEnabled={defaultBlurEnabled}
+                            setDefaultBlurEnabled={setDefaultBlurEnabled}
+                            t={t}
+                            IS_DEMO={IS_DEMO}
+                            api={api}
+                        />
                     )}
                 </AnimatePresence>
 
@@ -1515,6 +1608,168 @@ export default function App() {
                     </div>
                 </div>
             </footer>
-        </div >
+        </div>
+    );
+}
+
+// --- Sub-components ---
+
+function SettingsModal({ onClose, links, setLinks, backupEnabled, setBackupEnabled, defaultBlurEnabled, setDefaultBlurEnabled, t, IS_DEMO, api }) {
+    const [isBackingUp, setIsBackingUp] = useState(false);
+
+    const handleBackupAll = async () => {
+        if (isBackingUp) return;
+        setIsBackingUp(true);
+        try {
+            const cdnLinks = links.filter(l => l.thumbnail && l.thumbnail.startsWith('http'));
+            for (const link of cdnLinks) {
+                await api.backupThumbnail(link.id, link.thumbnail);
+            }
+            const res = await api.getLinks();
+            setLinks(Array.isArray(res.data) ? [...res.data].reverse() : []);
+            alert(t('exportSuccess'));
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setIsBackingUp(false);
+        }
+    };
+
+    return (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={onClose}
+                className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            />
+            <motion.div
+                initial={{ scale: 0.95, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.95, opacity: 0 }}
+                className="relative w-full max-w-md bg-[#16181c] border border-white/10 rounded-3xl overflow-hidden shadow-2xl"
+            >
+                <div className="p-6 border-b border-white/5 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <Settings className="w-5 h-5 text-blue-400" />
+                        <h3 className="text-xl font-bold text-white">{t('settings')}</h3>
+                    </div>
+                    <button onClick={onClose} className="p-2 hover:bg-white/5 rounded-full transition-colors">
+                        <X className="w-5 h-5 text-white/40" />
+                    </button>
+                </div>
+
+                <div className="p-6 space-y-6">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <h4 className="text-white font-medium">{t('localBackup')}</h4>
+                            <p className="text-xs text-white/40 mt-1">{t('localBackupDesc')}</p>
+                        </div>
+                        <IOSSwitch checked={backupEnabled} onChange={setBackupEnabled} />
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <h4 className="text-white font-medium">{t('defaultBlur')}</h4>
+                            <p className="text-xs text-white/40 mt-1">{t('defaultBlurDesc')}</p>
+                        </div>
+                        <IOSSwitch checked={defaultBlurEnabled} onChange={setDefaultBlurEnabled} />
+                    </div>
+
+                    <div className="pt-4 border-t border-white/5">
+                        <button
+                            onClick={handleBackupAll}
+                            disabled={isBackingUp || IS_DEMO}
+                            className={cn(
+                                "w-full p-4 rounded-xl border border-white/10 flex items-center justify-between group transition-all text-sm",
+                                (isBackingUp || IS_DEMO) ? "opacity-50 cursor-not-allowed" : "hover:bg-white/5 hover:border-blue-500/50"
+                            )}
+                        >
+                            <div className="text-left">
+                                <div className="text-white font-medium flex items-center gap-2">
+                                    <Download className="w-4 h-4 text-blue-400" />
+                                    {t('backupAll')}
+                                </div>
+                                <p className="text-[10px] text-white/40 mt-1">{t('backupAllDesc')}</p>
+                            </div>
+                            {isBackingUp && <RefreshCw className="w-4 h-4 text-blue-400 animate-spin" />}
+                        </button>
+                    </div>
+                </div>
+            </motion.div>
+        </div>
+    );
+}
+
+function IOSSwitch({ checked, onChange }) {
+    return (
+        <button
+            onClick={() => onChange(!checked)}
+            className={cn(
+                "relative w-12 h-7 rounded-full transition-colors duration-200 outline-none flex items-center",
+                checked ? "bg-green-500" : "bg-white/10"
+            )}
+        >
+            <motion.div
+                animate={{ x: checked ? 22 : 4 }}
+                transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                className="w-5 h-5 bg-white rounded-full shadow-md"
+            />
+        </button>
+    );
+}
+
+function TagManagerModal({ onClose, allTags, globalRenameTag, globalDeleteTag, t }) {
+    return (
+        <div className="fixed inset-0 z-[300] flex items-center justify-center p-4">
+            <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={onClose}
+                className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+            />
+            <motion.div
+                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                className="relative w-full max-w-md bg-zinc-900 border border-zinc-800 rounded-3xl shadow-3xl p-6 overflow-hidden"
+            >
+                <div className="flex justify-between items-center mb-6">
+                    <h3 className="text-xl font-bold flex items-center gap-2">
+                        <Tag className="w-5 h-5 text-blue-400" />
+                        {t('tagManager')}
+                    </h3>
+                    <button onClick={onClose} className="p-2 hover:bg-zinc-800 rounded-xl transition-colors">
+                        <X className="w-5 h-5" />
+                    </button>
+                </div>
+
+                <div className="max-h-[60vh] overflow-y-auto space-y-2 pr-2 custom-scrollbar">
+                    {allTags.filter(t => t.name !== 'ALL').map(tag => (
+                        <div key={tag.name} className="flex items-center justify-between p-3 bg-zinc-800/50 rounded-2xl hover:bg-zinc-800 transition-colors group">
+                            <span className="font-medium text-zinc-200">{tag.name}</span>
+                            <div className="flex gap-1 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button
+                                    onClick={() => globalRenameTag(tag.name)}
+                                    className="p-2 hover:bg-blue-500/20 text-blue-400 rounded-lg transition-colors"
+                                    title={t('renameTag')}
+                                >
+                                    <Edit2 className="w-4 h-4" />
+                                </button>
+                                <button
+                                    onClick={() => globalDeleteTag(tag.name)}
+                                    className="p-2 hover:bg-red-500/20 text-red-400 rounded-lg transition-colors"
+                                    title={t('deleteTag')}
+                                >
+                                    <Trash2 className="w-4 h-4" />
+                                </button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </motion.div>
+        </div>
     );
 }

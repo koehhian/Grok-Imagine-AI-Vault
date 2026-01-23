@@ -1,0 +1,31 @@
+{
+    "manifest_version": 3,
+    "name": "Grok Vault Helper",
+    "version": "1.0",
+    "description": "Auto-capture links and bulk-select cards on Grok Imagine for your AI Vault.",
+    "permissions": [
+        "storage"
+    ],
+    "content_scripts": [
+        {
+            "matches": [
+                "https://grok.com/*"
+            ],
+            "js": [
+                "content.js"
+            ],
+            "css": [
+                "styles.css"
+            ],
+            "run_at": "document_end"
+        }
+    ],
+    "action": {
+        "default_title": "Grok Vault Helper"
+    },
+    "browser_specific_settings": {
+        "gecko": {
+            "id": "grok-vault-helper@antigravity.ai"
+        }
+    }
+}

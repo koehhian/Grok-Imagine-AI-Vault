@@ -4,81 +4,84 @@
 
 # Grok Imagine AI Vault
 
-[English](README.md) | **繁體中文**
+[English](README.md) | **繁體中文** | [简体中文](README_zh-CN.md) | [日本語](README_ja.md)
+
+一個專門為 [Grok.com](https://grok.com/imagine) 打造的優雅圖卡管理工具，讓你輕鬆收藏、分類與備份所有的 AI 作品。
+
+---
+
+### 🚀 快速上手 (三分鐘搞定)
+
+1.  **安裝助手**：將 `grok-extension` 資料夾載入 Chrome 開發者模式（[新手安裝指南](extension_newbie_zh-TW.md)）。
+2.  **擷取圖片**：在 Grok 網頁點擊助手面板的「複製全部」，或按住 `Shift` 拖曳框選圖片。
+3.  **啟動本機**：執行 `node server.js` 與 `npm run dev`（[終端機啟動指南](terminal_newbie_zh-TW.md)）。
+4.  **貼入收藏**：在 Vault 網頁按下 `Ctrl/Cmd + V` 貼上，搞定！
+
+---
 
 <div align="center">
   <img src="public/preview.png" alt="App Preview" width="100%" style="border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);" />
 </div>
 
-這是一個專為 Grok 設計的 AI 生成圖片管理系統，讓你能優雅、高效地整理你的創意作品。
+## ✨ 核心亮點
 
-## 功能特色
+-   **沉浸式 Web 管理介面**：深色模式、瀑布流佈局，優雅瀏覽你的所有 Grok作品。支援多選、批次刪除與標籤管理。
+-   **智慧識別圖卡資訊**：拖放圖片或貼上複雜數據時，系統會自動提取原始 Grok ID，告別雜訊。
+-   **本機自動備份**：開啟伺服器後，系統會自動將遠端圖片下載至本機 `backups/` 資料夾，防止網址失效。
+-   **隱私與美學**：支援「隱私模糊」模式、沉浸式畫中畫預覽、以及強大的標籤管理系統。
+-   **Vault 助手 (套件)**：支援自動偵測、範圍導出、套索工具，並提供「批次按愛心」功能以保證連結持久。
 
-- **全方位 Grok 連結支援**: 支援捕捉 `post`、`video`、`share` 甚至 `imagine-public` 圖片直連。
-- **自動縮圖與 UUID 提取**: 自動從各種 Grok 連結格式中提取 UUID 並顯示 .jpg 縮圖。
-- **CDN 轉貼文功能 (CDN-to-Post)**: 直接拖入 Grok 圖片網址時，系統會自動將連結轉換為對應的 Grok 貼文網址，並保留原始圖片作為高品質縮圖。
-- **強大拖拽偵測**: 智慧過濾 Base64 原始資料，優先捕捉真實網址，相容多種瀏覽器拖曳行為。
-- **資料可攜性 (Data Portability)**: 輕鬆匯出與匯入完整的 JSON 資料庫，方便在不同裝置間遷移。
-- **多標籤系統 (Multi-Tag System)**: 支援多標籤分類管理，並提供「更多標籤」下拉式選單。
-- **Grok 風格介面**: 極簡、高對比的深色模式，搭配 **固定式頂欄 (Sticky Header)** 方便操作。
-- **批次操作 (Batch Operations)**: 支援多選、批次刪除與標籤管理；批量新增支援換行、逗號或空白分隔。
-- **隱私優先 (Privacy First)**: 內建一鍵模糊功能，保護瀏覽隱私。
+## 💡 小提示：如何長久保存圖片？
 
-## 使用技巧
+> [!TIP]
+> **強烈建議**在 Grok.com 上為妳喜歡的圖片**按愛心 (❤️)**。
+> 這會將圖片存入妳的帳號資訊中，有效減少圖片過期無法存取的風險。妳可以使用 Vault 助手的「❤️ 批次按愛心」按鈕快速完成。
 
-### Grok 縮圖
-為了獲得最佳體驗：
-> [!IMPORTANT]
-> **靜態圖片要求**: 從 Grok複製公開貼文連結時，請確保你是在查看 **靜態圖片 (Static Image)** 的狀態。如果你在圖片生成中或動態預覽時複製連結，可能會導致縮圖無法正確讀取。
+## 🛠️ 如何加入圖卡？
 
-### 影片手動縮圖
-目前影片（包括已製作過影片的圖片連結）不支援自動縮圖，需手動加入，方法如下：
-1. 點擊卡片上的圖示彈窗，開啟 Grok 頁面。
-2. 在 Grok 中手動從 **影片 (Video)** 切換到 **圖片 (Image)**。
-3. 將該圖片直接**拖拽**回到 Grok Imagine AI Vault 的卡片上，即可完成縮圖綁定。
+1.  **批次貼上**：直接在管理介面貼上多個連結（用換行、逗號或空格分隔）。
+    *   範例：
+        ```text
+        https://grok.com/imagine/post/e8910ae5-f4e5-42d4-ae10-b5852027ae69
+        https://grok.com/imagine/post/946bef9e-8884-4960-856e-336ae977ad97
+        ```
+2.  **拖放功能**：直接從 Grok 網頁或本地資料夾將圖片拖入管理介面，系統會自動識別。
+3.  **Vault 助手 (推薦)**：安裝 [grok-extension](grok-extension/) 以獲得自動擷取體驗。
 
-### 批量上傳
-您可以在批量新增欄位中貼上多個連結，支援以 **換行**、**逗號** 或 **空白** 分隔。您可以一次性為整批連結加上標籤。
+<div align="center">
+  <img src="public/extension_zh.png" alt="Extension Screenshot" width="80%" style="border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);" />
+</div>
 
-### 匯出/匯入 (Export/Import)
-使用頁首的 **匯出** ![export](assets/export.png)與 **匯入** ![import](assets/import.png)按鈕來備份你的資料，或將資料轉移到另一個 Vault 實例。
+## 🚀 開始使用
 
-## 技術棧
-
-- **Frontend**: React, TailwindCSS, Framer Motion, Lucide Icons.
-- **Backend**: Node.js, Express.
-- **Storage**: JSON-based flat file system (`data/links.json`).
-
-## 快速開始
-
-1. Clone 此專案。
-2. 安裝依賴：
-   ```bash
-   npm install
-   ```
-3. 啟動應用程式：
-   ```bash
-   node server.js & npm run dev
-   ```
-4. 在瀏覽器打開 [http://localhost:5179](http://localhost:5179)。
-
-## 授權 (License)
-
-## 💎 進階神器：Grok Link Detector
-
-如何有效率獲取 `grok.com/imagine` 連結：
-
-1.  **安裝 Tampermonkey**：瀏覽器油猴插件。
-2.  **建立腳本**：建立新腳本，並貼入 [`grok-detector.js`](grok-detector.js) 的內容。
-3.  **自動捕捉**：在 Grok 頁面滾動，右下角會顯示捕捉數量。
-4.  **同步入庫**：點擊 **"Copy for Vault"**，然後在您的 Vault 中使用「導入 (Import)」功能即可。
+1.  **準備**：確保本機已安裝 [Node.js](https://nodejs.org/)。
+2.  **安裝**：
+    ```bash
+    git clone https://github.com/koehhian/Grok-Imagine-AI-Vault.git
+    cd Grok-Imagine-AI-Vault
+    npm install
+    ```
+3.  **啟動**：執行 `node server.js` (備份伺服器) 與 `npm run dev` (管理介面)。
 
 ---
-🚀 祝您的 AI 創作庫日益壯大！
+
+## 📸 媒體製作指南 (Media Production Guide)
+
+若要製作吸引人的社群分享素材，建議錄製這四段核心畫面：
+1.  **極簡工作流**：將 Grok 圖片拖入 Vault，展示它瞬間出現並識別的樣子。
+2.  **套索選取 (Lasso)**：按住 `Shift` 並框選一群圖片，展示流暢的青色選取效果。
+3.  **即時套件偵測**：捲動 Grok 畫廊，展示助手面板上的計數器不斷跳動。
+4.  **視覺化 Vault**：快速捲動並展示你已經分類、打好標籤的大型精美畫廊。
+
+---
+
+> **不懂如何使用終端機？** 請參考 [💻 終端機新手指南](terminal_newbie_zh-TW.md)
+> **不懂如何安裝套件？** 請參考 [🧩 套件安裝新手指南](extension_newbie_zh-TW.md)
+
+## 授權 (License)
 
 本專案採用 **GNU GPL v3** 開源授權。詳情請見 [LICENSE](https://www.gnu.org/licenses/gpl-3.0.html)。
 
 ## 請我喝杯咖啡 (Buy Me a Coffee)
 
 如果你覺得這個工具對你有幫助，歡迎請我喝杯咖啡支持開發！
-[贊助連結](https://buymeacoffee.com/koehhian)
