@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## [1.0.5] - 2026-01-23
+
+### Changed
+- **Documentation**: All localized README files now explicitly mention that duplicate links are automatically filtered.
+
 ## [1.0.4] - 2026-01-23
 
 ### Added
