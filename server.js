@@ -128,12 +128,13 @@ app.post('/api/links/bulk', (req, res) => {
             };
         });
 
+    const skippedCount = links.length - newLinks.length;
     if (newLinks.length > 0) {
-        console.log(`[Bulk Add] Successfully added ${newLinks.length} new items.`);
+        console.log(`[Bulk Add] Successfully added ${newLinks.length} new items. Skipped ${skippedCount} duplicates.`);
     }
     const updatedData = [...data, ...newLinks];
     fs.writeFileSync(DATA_FILE, JSON.stringify(updatedData, null, 2));
-    res.json(newLinks);
+    res.json({ added: newLinks, skippedCount });
 });
 
 // PATCH to update link properties (thumbnail, album, title, etc)
@@ -254,10 +255,18 @@ const downloadImage = async (url, photoId) => {
     if (fs.existsSync(dest)) return `/thumbnails/${photoId}.jpg`;
 
     try {
-        const response = await fetch(url);
-        if (!response.ok) throw new Error(`Failed to fetch image: ${response.statusText}`);
-        const buffer = await response.arrayBuffer();
-        fs.writeFileSync(dest, Buffer.from(buffer));
+        const response = await axios({
+            method: 'get',
+            url: url,
+            responseType: 'arraybuffer',
+            timeout: 15000,
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
+                'Referer': 'https://grok.com/'
+            }
+        });
+
+        fs.writeFileSync(dest, Buffer.from(response.data));
         console.log(`[Backup] Saved: ${photoId}.jpg`);
         return `/thumbnails/${photoId}.jpg`;
     } catch (err) {

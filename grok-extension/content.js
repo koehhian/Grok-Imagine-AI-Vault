@@ -25,7 +25,8 @@
             btnCopyRange: "COPY RANGE",
             secManual: "Manual Selection",
             labelSel: "Selected:",
-            btnCopySel: "COPY SELECTED",
+            btnCopySel: "COPY SELECTED LINKS",
+            btnDownloadSel: "DOWNLOAD SELECTED IMAGES",
             hint: "💡 Shift + Drag to Lasso",
             copied: "COPIED! ✅",
             noRange: "⚠️ No links found in this range.",
@@ -63,7 +64,8 @@
             btnCopyRange: "复制范围",
             secManual: "手动选取",
             labelSel: "已选取:",
-            btnCopySel: "复制已选项目",
+            btnCopySel: "复制已选项目链接",
+            btnDownloadSel: "下载已选照片",
             hint: "💡 Shift + 拖拽 以套索选取",
             copied: "已复制! ✅",
             noRange: "⚠️ 此范围内没有链接。",
@@ -82,7 +84,8 @@
             btnCopyRange: "範囲コピー",
             secManual: "手動選択",
             labelSel: "選択数:",
-            btnCopySel: "選択項目をコピー",
+            btnCopySel: "選択項目のリンクをコピー",
+            btnDownloadSel: "選択した画像をダウンロード",
             hint: "💡 Shift + ドラッグで投げ縄選択",
             copied: "コピー完了! ✅",
             noRange: "⚠️ この範囲にはリンクがありません。",
@@ -178,8 +181,9 @@
                     <button id="grok-clear-selected" class="grok-btn-clear" title="${t.btnClear}">${t.btnClear}</button>
                 </div>
             </div>
-            <div class="grok-manual-btns">
+            <div className="grok-manual-btns">
                 <button id="grok-copy-selected" class="grok-btn btn-primary" style="display:none;">${t.btnCopySel}</button>
+                <button id="grok-download-selected" class="grok-btn btn-secondary" style="display:none;">${t.btnDownloadSel}</button>
                 <button id="grok-like-selected" class="grok-btn btn-like" style="display:none;">${t.btnLike}</button>
             </div>
 
@@ -245,6 +249,7 @@
                 if (isAutoEnabled) scan();
             };
             p.querySelector('#grok-copy-selected').onclick = () => copyLinks(Array.from(selectedLinks), 'grok-copy-selected');
+            p.querySelector('#grok-download-selected').onclick = handleDownloadSelected;
             p.querySelector('#grok-clear-selected').onclick = () => { selectedLinks.clear(); updateUI(); };
             p.querySelector('#grok-like-selected').onclick = handleBatchLike;
             p.querySelector('#grok-copy-all').onclick = () => copyLinks(capturedLinks, 'grok-copy-all');
@@ -369,6 +374,8 @@
         if (sel) sel.innerText = selectedLinks.size;
 
         if (bSel) bSel.style.display = selectedLinks.size > 0 ? 'block' : 'none';
+        const bDown = document.getElementById('grok-download-selected');
+        if (bDown) bDown.style.display = selectedLinks.size > 0 ? 'block' : 'none';
         if (bLike) bLike.style.display = (selectedLinks.size > 0 || capturedLinks.length > 0) ? 'block' : 'none';
 
         if (bAll) bAll.innerText = `${TRANSLATIONS[currentLang].btnCopyAll} (${capturedLinks.length})`;
@@ -475,6 +482,45 @@
         setInterval(scan, 2000);
         window.addEventListener('scroll', scan);
         scan();
+    };
+
+    const handleDownloadSelected = async () => {
+        const urls = Array.from(selectedLinks);
+        if (urls.length === 0) return;
+
+        const btn = document.getElementById('grok-download-selected');
+        const oldText = btn.innerText;
+        btn.innerText = "⏳ DOWNLOADING...";
+        btn.disabled = true;
+
+        for (const url of urls) {
+            const match = url.match(/post\/([a-f0-9-]{36})/i);
+            if (match) {
+                const uuid = match[1];
+                const imgUrl = `https://imagine-public.x.ai/imagine-public/images/${uuid}.jpg`;
+                try {
+                    const res = await fetch(imgUrl);
+                    const blob = await res.blob();
+                    const a = document.createElement('a');
+                    a.href = URL.createObjectURL(blob);
+                    a.download = `grok-${uuid}.jpg`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(a.href);
+                } catch (err) {
+                    console.error("Download failed for", imgUrl, err);
+                }
+            }
+        }
+
+        btn.innerText = TRANSLATIONS[currentLang].copied;
+        btn.style.background = "#10b981";
+        setTimeout(() => {
+            btn.innerText = oldText;
+            btn.style.background = "";
+            btn.disabled = false;
+        }, 2000);
     };
 
     init();

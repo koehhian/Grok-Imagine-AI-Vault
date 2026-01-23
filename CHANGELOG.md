@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## [1.0.6] - 2026-01-23
+
+### Added
+- **Web App**: Toast notification system for bulk additions and status updates.
+- **Web App**: Real-time progress display for the "Backup All" process.
+- **Extension**: New "Download Selected Images" button for direct ZIP-like batch downloading.
+
+### Fixed
+- **Web App**: Fixed "Backup All" process occasionally failing due to CDN fetch restrictions (added headers and timeout).
+- **Extension**: Clarified labels (e.g., "Copy Selected Links").
+
 ## [1.0.5] - 2026-01-23
 
 ### Changed

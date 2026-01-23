@@ -214,7 +214,10 @@ const TRANSLATIONS = {
         backupAllDesc: 'Download all CDN images to your local storage',
         localBackupDesc: 'Automatically download thumbnails to local storage',
         defaultBlurDesc: 'Always start with privacy blur enabled',
-        pipPreview: 'Mini Preview'
+        pipPreview: 'Mini Preview',
+        addedItems: 'Added {count} new items.',
+        skippedDuplicates: '{count} duplicates skipped.',
+        backingUp: 'Backing up {current}/{total}...'
     },
     'zh-cn': {
         title: 'Grok Imagine AI Vault',
@@ -266,7 +269,11 @@ const TRANSLATIONS = {
         backupAll: '备份所有现有图片',
         backupAllDesc: '将所有 CDN 图片下载到您的本地存储',
         localBackupDesc: '自动下载缩略图到本地存储',
-        defaultBlurDesc: '启动时默认开启隐私模糊'
+        defaultBlurDesc: '启动时默认开启隐私模糊',
+        pipPreview: '迷你预览',
+        addedItems: '已添加 {count} 個新项目。',
+        skippedDuplicates: '已略过 {count} 个重复链接。',
+        backingUp: '正在备份 {current}/{total}...'
     },
     'zh-tw': {
         title: 'Grok Imagine AI Vault',
@@ -318,7 +325,11 @@ const TRANSLATIONS = {
         backupAll: '備份所有現有圖片',
         backupAllDesc: '將所有 CDN 圖片下載到您的本地存儲',
         localBackupDesc: '自動下載縮圖到本地存儲',
-        defaultBlurDesc: '啟動時預設開啟隱私模糊'
+        defaultBlurDesc: '啟動時預設開啟隱私模糊',
+        pipPreview: '子母畫面預覽',
+        addedItems: '已加入 {count} 個新項目。',
+        skippedDuplicates: '已略過 {count} 個重複連結。',
+        backingUp: '正在備份 {current}/{total}...'
     },
     'ja': {
         title: 'Grok Imagine AI Vault',
@@ -371,7 +382,10 @@ const TRANSLATIONS = {
         backupAllDesc: 'すべてのCDN画像をローカルストレージにダウンロードします',
         localBackupDesc: 'サムネイルをローカルストレージに自動保存',
         defaultBlurDesc: '起動時にプライバシーぼかしを有効にする',
-        pipPreview: 'ミニプレビュー'
+        pipPreview: 'ミニプレビュー',
+        addedItems: '{count} 個の新しい項目を追加しました。',
+        skippedDuplicates: '{count} 個の重複リンクをスキップしました。',
+        backingUp: 'バックアップ中 {current}/{total}...'
     }
 };
 
@@ -393,6 +407,15 @@ export default function App() {
     const [sortBy, setSortBy] = useState('newest'); // newest, oldest, titleAz
     const [sortOpen, setSortOpen] = useState(false);
     const [tagManagerOpen, setTagManagerOpen] = useState(false);
+    const [notifications, setNotifications] = useState([]);
+
+    const showNotification = (message, type = 'info') => {
+        const id = Date.now();
+        setNotifications(prev => [{ id, message, type }, ...prev]);
+        setTimeout(() => {
+            setNotifications(prev => prev.filter(n => n.id !== id));
+        }, 5000);
+    };
 
     const t = (key, params = {}) => {
         let text = TRANSLATIONS[language][key] || key;
@@ -510,36 +533,52 @@ export default function App() {
             if (urls.length === 1) {
                 const url = urls[0];
                 const thumbnail = deriveGrokThumbnail(url);
-                const response = await api.addLink(url, tagArray);
-                if (thumbnail) {
-                    let finalThumbnail = thumbnail;
-                    if (backupEnabled && !IS_DEMO) {
-                        try {
-                            const backupRes = await api.backupThumbnail(response.data.id, thumbnail);
-                            if (backupRes.data.success) finalThumbnail = backupRes.data.localUrl;
-                        } catch (err) {
-                            console.error('Backup failed:', err);
+                try {
+                    const response = await api.addLink(url, tagArray);
+                    if (thumbnail) {
+                        let finalThumbnail = thumbnail;
+                        if (backupEnabled && !IS_DEMO) {
+                            try {
+                                const backupRes = await api.backupThumbnail(response.data.id, thumbnail);
+                                if (backupRes.data.success) finalThumbnail = backupRes.data.localUrl;
+                            } catch (err) {
+                                console.error('Backup failed:', err);
+                            }
                         }
+                        await api.updateLink(response.data.id, { thumbnail: finalThumbnail });
+                        response.data.thumbnail = finalThumbnail;
                     }
-                    await api.updateLink(response.data.id, { thumbnail: finalThumbnail });
-                    response.data.thumbnail = finalThumbnail;
+                    setLinks([response.data, ...links]);
+                    showNotification(t('addedItems', { count: 1 }), 'success');
+                } catch (err) {
+                    if (err.response && err.response.status === 409) {
+                        showNotification(t('skippedDuplicates', { count: 1 }), 'warning');
+                    } else {
+                        throw err;
+                    }
                 }
-                setLinks([response.data, ...links]);
             } else {
                 const bulkItems = urls.map(url => ({
                     url,
                     thumbnail: deriveGrokThumbnail(url)
                 }));
                 const response = await api.addBulk(bulkItems, tagArray);
+                const { added, skippedCount } = response.data;
+
+                if (added.length > 0) {
+                    showNotification(t('addedItems', { count: added.length }), 'success');
+                    setLinks([...added.reverse(), ...links]);
+                }
+                if (skippedCount > 0) {
+                    showNotification(t('skippedDuplicates', { count: skippedCount }), 'warning');
+                }
 
                 // If backup enabled, trigger backup for each item in background
-                if (backupEnabled && !IS_DEMO) {
-                    response.data.forEach(item => {
+                if (backupEnabled && !IS_DEMO && added.length > 0) {
+                    added.forEach(item => {
                         if (item.thumbnail) api.backupThumbnail(item.id, item.thumbnail);
                     });
                 }
-
-                setLinks([...response.data, ...links]);
             }
             setNewUrl('');
             setNewTags('');
@@ -1562,20 +1601,23 @@ export default function App() {
                 {/* Settings Modal */}
                 <AnimatePresence>
                     {settingsOpen && (
-                        <SettingsModal
-                            onClose={() => setSettingsOpen(false)}
-                            links={links}
-                            setLinks={setLinks}
-                            backupEnabled={backupEnabled}
-                            setBackupEnabled={setBackupEnabled}
-                            defaultBlurEnabled={defaultBlurEnabled}
-                            setDefaultBlurEnabled={setDefaultBlurEnabled}
-                            t={t}
-                            IS_DEMO={IS_DEMO}
-                            api={api}
-                        />
-                    )}
-                </AnimatePresence>
+                            <SettingsModal
+                                onClose={() => setSettingsOpen(false)}
+                                links={links}
+                                setLinks={setLinks}
+                                backupEnabled={backupEnabled}
+                                setBackupEnabled={setBackupEnabled}
+                                defaultBlurEnabled={defaultBlurEnabled}
+                                setDefaultBlurEnabled={setDefaultBlurEnabled}
+                                t={t}
+                                IS_DEMO={IS_DEMO}
+                                api={api}
+                                showNotification={showNotification}
+                            />
+                        )}
+                    </AnimatePresence>
+
+                    <NotificationToast notifications={notifications} />
 
             </div>
 
@@ -1614,22 +1656,40 @@ export default function App() {
 
 // --- Sub-components ---
 
-function SettingsModal({ onClose, links, setLinks, backupEnabled, setBackupEnabled, defaultBlurEnabled, setDefaultBlurEnabled, t, IS_DEMO, api }) {
+function SettingsModal({ onClose, links, setLinks, backupEnabled, setBackupEnabled, defaultBlurEnabled, setDefaultBlurEnabled, t, IS_DEMO, api, showNotification }) {
     const [isBackingUp, setIsBackingUp] = useState(false);
+    const [backupProgress, setBackupProgress] = useState({ current: 0, total: 0 });
 
     const handleBackupAll = async () => {
         if (isBackingUp) return;
+
+        const cdnLinks = links.filter(l => l.thumbnail && l.thumbnail.startsWith('http'));
+        if (cdnLinks.length === 0) {
+            showNotification(t('noLinks'), 'info');
+            return;
+        }
+
         setIsBackingUp(true);
+        setBackupProgress({ current: 0, total: cdnLinks.length });
+
+        let successCount = 0;
         try {
-            const cdnLinks = links.filter(l => l.thumbnail && l.thumbnail.startsWith('http'));
-            for (const link of cdnLinks) {
-                await api.backupThumbnail(link.id, link.thumbnail);
+            for (let i = 0; i < cdnLinks.length; i++) {
+                const link = cdnLinks[i];
+                setBackupProgress({ current: i + 1, total: cdnLinks.length });
+                try {
+                    await api.backupThumbnail(link.id, link.thumbnail);
+                    successCount++;
+                } catch (err) {
+                    console.error(`Failed to backup ${link.id}:`, err);
+                }
             }
             const res = await api.getLinks();
             setLinks(Array.isArray(res.data) ? [...res.data].reverse() : []);
-            alert(t('exportSuccess'));
+            showNotification(t('exportSuccess'), 'success');
         } catch (err) {
             console.error(err);
+            showNotification(err.message, 'error');
         } finally {
             setIsBackingUp(false);
         }
@@ -1689,7 +1749,11 @@ function SettingsModal({ onClose, links, setLinks, backupEnabled, setBackupEnabl
                             <div className="text-left">
                                 <div className="text-white font-medium flex items-center gap-2">
                                     <Download className="w-4 h-4 text-blue-400" />
-                                    {t('backupAll')}
+                                    {isBackingUp ? (
+                                        <span>{t('backingUp', { current: backupProgress.current, total: backupProgress.total })}</span>
+                                    ) : (
+                                        t('backupAll')
+                                    )}
                                 </div>
                                 <p className="text-[10px] text-white/40 mt-1">{t('backupAllDesc')}</p>
                             </div>
@@ -1718,6 +1782,55 @@ function IOSSwitch({ checked, onChange }) {
             />
         </button>
     );
+}
+
+function NotificationToast({ notifications }) {
+    return (
+        <div className="fixed bottom-6 right-6 z-[200] flex flex-col gap-3 pointer-events-none">
+            <AnimatePresence>
+                {notifications.map(n => (
+                    <motion.div
+                        key={n.id}
+                        initial={{ opacity: 0, y: 20, scale: 0.9 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.9 }}
+                        className={cn(
+                            "px-4 py-3 rounded-xl shadow-2xl border backdrop-blur-md min-w-[220px] flex items-center gap-3 pointer-events-auto",
+                            n.type === 'success' ? "bg-emerald-500/20 border-emerald-500/30 text-emerald-400" :
+                            n.type === 'warning' ? "bg-amber-500/20 border-amber-500/30 text-amber-400" :
+                            "bg-blue-500/20 border-blue-500/30 text-blue-400"
+                        )}
+                    >
+                        {n.type === 'success' && <Check className="w-4 h-4" />}
+                        {n.type === 'warning' && <AlertCircle className="w-4 h-4" />}
+                        {n.type === 'info' && <RefreshCw className="w-4 h-4 animate-spin" />}
+                        <span className="text-xs font-medium">{n.message}</span>
+                    </motion.div>
+                ))}
+            </AnimatePresence>
+        </div>
+    );
+}
+
+function AlertCircle(props) {
+    return (
+        <svg
+            {...props}
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+        >
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" x2="12" y1="8" y2="12" />
+            <line x1="12" x2="12.01" y1="16" y2="16" />
+        </svg>
+    )
 }
 
 function TagManagerModal({ onClose, allTags, globalRenameTag, globalDeleteTag, t }) {
