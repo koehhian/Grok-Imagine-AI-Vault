@@ -84,4 +84,5 @@ This project is licensed under the **GNU GPL v3**. See [LICENSE](https://www.gnu
 
 ## Buy Me a Coffee
 
-If you find this tool useful, feel free to buy me a coffee!
+If you find this tool useful, feel free to buy me a coffee! ☕️
+[**Buy Me a Coffee**](https://buymeacoffee.com/koehhian)
