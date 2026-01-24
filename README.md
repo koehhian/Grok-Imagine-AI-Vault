@@ -27,10 +27,11 @@ An elegant management tool designed for [Grok.com](https://grok.com/imagine), al
 
 ## ✨ Key Features
 
--   **Immersive Web Interface**: Beautifully browse your Grok creations with dark mode and masonry layout. Supports multi-select, batch delete, and tag management.
+-   **Categorized Settings Menu**: A professional sidebar-based settings UI, organizing options into **Privacy**, **Backup**, and **Network** for a cleaner experience.
 -   **Smart Information Extraction**: Automatically extracts the original Grok ID from dragged images or complex pasted data. **Duplicate links are automatically filtered** to keep your library clean.
--   **Automatic Local Backup**: When the server is running, the system automatically downloads remote images to your local `backups/` folder, preventing link expiration.
--   **Privacy & Aesthetics**: Features "Privacy Blur" mode, immersive Picture-in-Picture preview, and a robust tagging system.
+-   **Automatic Local Backup**: When the server is running, the system automatically downloads remote image thumbnails to your local cache, preventing link expiration.
+-   **Batch Download to System**: Download all your saved creations directly to your **System Default Downloads Folder** for easy access.
+-   **Privacy & Aesthetics**: Features "Privacy Blur" mode, immersive Picture-in-Picture preview, and modern UI indicators (Stars/Aperture) for a premium look and feel.
 -   **Vault Helper (Extension)**: Enhances your browsing with auto-detection, range export, lasso selection, and a "Batch Like" feature to preserve link persistence.
 
 ## 💡 Pro Tip: How to keep your images forever?

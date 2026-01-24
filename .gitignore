@@ -1,7 +1,29 @@
-node_modules
+# Dependencies
+node_modules/
+
+# OS Files
 .DS_Store
-dist
+Thumbs.db
+
+# Build Artifacts
+dist/
+build/
 .env
-data/*.json
+
+# User Data & Backups (CRITICAL PRIVACY)
+# This excludes all files in 'data' except the template files.
+data/
 !data/links_template.json
-server.log
+# Fallback for common backup dir names
+backups/
+thumbnails/
+
+# Extension testing
+grok-extension/*.zip
+grok-extension/test-data/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

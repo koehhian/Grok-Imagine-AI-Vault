@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
-import { Search, Plus, ExternalLink, RefreshCw, Trash2, Image as ImageIcon, Languages, Globe, Tag, Check, CheckSquare, X, ChevronDown, MoreHorizontal, Edit2, Download, Upload, ArrowUpDown, Settings, Maximize2 } from 'lucide-react';
+import { Search, Plus, ExternalLink, RefreshCw, Trash2, Image as ImageIcon, Languages, Globe, Tag, Check, CheckSquare, X, ChevronDown, MoreHorizontal, Edit2, Download, Upload, ArrowUpDown, Settings, Maximize2, Maximize, ChevronLeft, ChevronRight, Play, Film, Shield, Database, Stars, Aperture } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -9,7 +9,7 @@ function cn(...inputs) {
     return twMerge(clsx(inputs));
 }
 
-const API_URL = 'http://localhost:3002/api';
+const API_URL = `http://${window.location.hostname}:3002/api`;
 
 // Auto-detect if running on GitHub Pages or Vercel or explicitly set
 const IS_DEMO = typeof window !== 'undefined' && (
@@ -19,7 +19,21 @@ const IS_DEMO = typeof window !== 'undefined' && (
 
 // Mock Data for Demo
 const DEMO_INITIAL_DATA = [
-    { id: 'demo_1', url: 'https://grok.com/imagine/post/698a6a44-ac3b-449a-b2b4-0ee33ccdb803', title: 'Cyberpunk Portrait', thumbnail: 'https://imagine-public.x.ai/imagine-public/images/698a6a44-ac3b-449a-b2b4-0ee33ccdb803.jpg', tags: ['Demo', 'Portrait'], addedAt: new Date().toISOString() },
+    {
+        id: 'demo_1',
+        url: 'https://grok.com/imagine/post/698a6a44-ac3b-449a-b2b4-0ee33ccdb803',
+        title: 'Cyberpunk Portrait',
+        thumbnail: 'https://imagine-public.x.ai/imagine-public/images/698a6a44-ac3b-449a-b2b4-0ee33ccdb803.jpg',
+        tags: ['Demo', 'Portrait'],
+        addedAt: new Date().toISOString(),
+        derivatives: [
+            { id: 'd1', type: 'video', thumbnail: 'https://imagine-public.x.ai/imagine-public/images/698a6a44-ac3b-449a-b2b4-0ee33ccdb803.jpg', url: 'https://www.w3schools.com/html/mov_bbb.mp4' },
+            { id: 'd2', type: 'photo', thumbnail: 'https://imagine-public.x.ai/imagine-public/images/a4dba2ee-6654-4f7a-985c-3d964473394d.jpg', url: 'https://grok.com/p1' },
+            { id: 'd3', type: 'video', thumbnail: 'https://imagine-public.x.ai/imagine-public/images/740a1af2-da7e-4a28-8327-1d05e5c17c91.jpg', url: 'https://www.w3schools.com/html/movie.mp4' },
+            { id: 'd4', type: 'photo', thumbnail: 'https://imagine-public.x.ai/imagine-public/images/56d72a94-0687-41eb-ab68-5c26665ebc78.jpg', url: 'https://grok.com/p2' },
+            { id: 'd5', type: 'video', thumbnail: 'https://imagine-public.x.ai/imagine-public/images/6f620019-1bd9-45bb-b5f4-2c2f65209be6.jpg', url: 'https://www.w3schools.com/html/mov_bbb.mp4' }
+        ]
+    },
     { id: 'demo_2', url: 'https://grok.com/imagine/post/a4dba2ee-6654-4f7a-985c-3d964473394d', title: 'Futuristic Landscape', thumbnail: 'https://imagine-public.x.ai/imagine-public/images/a4dba2ee-6654-4f7a-985c-3d964473394d.jpg', tags: ['Demo'], addedAt: new Date(Date.now() - 1000).toISOString() },
     { id: 'demo_3', url: 'https://grok.com/imagine/post/740a1af2-da7e-4a28-8327-1d05e5c17c91', title: 'Anime Aesthetic', thumbnail: 'https://imagine-public.x.ai/imagine-public/images/740a1af2-da7e-4a28-8327-1d05e5c17c91.jpg', tags: ['Demo'], addedAt: new Date(Date.now() - 2000).toISOString() },
     { id: 'demo_4', url: 'https://grok.com/imagine/post/56d72a94-0687-41eb-ab68-5c26665ebc78', title: 'Dreamy Scene', thumbnail: 'https://imagine-public.x.ai/imagine-public/images/56d72a94-0687-41eb-ab68-5c26665ebc78.jpg', tags: ['Demo'], addedAt: new Date(Date.now() - 3000).toISOString() },
@@ -35,132 +49,6 @@ const DEMO_INITIAL_DATA = [
  * Data Storage Adapter
  * Abstracts the difference between local backend (axios) and GitHub Pages (localStorage)
  */
-const api = {
-    getLinks: async () => {
-        if (IS_DEMO) {
-            const stored = localStorage.getItem('grok_vault_links_v1_4');
-            if (!stored) {
-                localStorage.setItem('grok_vault_links_v1_4', JSON.stringify(DEMO_INITIAL_DATA));
-                return { data: DEMO_INITIAL_DATA };
-            }
-            return { data: JSON.parse(stored) };
-        }
-        return axios.get(`${API_URL}/links`);
-    },
-    addLink: async (url, tags) => {
-        if (IS_DEMO) {
-            const newItem = {
-                id: Date.now().toString(),
-                url,
-                title: 'Untitled AI Image',
-                tags: tags || [],
-                thumbnail: null,
-                addedAt: new Date().toISOString()
-            };
-            const stored = JSON.parse(localStorage.getItem('grok_vault_links_v1_4') || '[]');
-            const newData = [newItem, ...stored];
-            localStorage.setItem('grok_vault_links_v1_4', JSON.stringify(newData));
-            return { data: newItem };
-        }
-        return axios.post(`${API_URL}/links`, { url, tags });
-    },
-    addBulk: async (links, tags) => {
-        if (IS_DEMO) {
-            const newItems = links.map((l, i) => ({
-                id: (Date.now() + i).toString(),
-                url: l.url,
-                title: 'Untitled AI Image',
-                tags: tags || [],
-                thumbnail: l.thumbnail || null,
-                addedAt: new Date().toISOString()
-            }));
-            const stored = JSON.parse(localStorage.getItem('grok_vault_links_v1_4') || '[]');
-            const newData = [...newItems, ...stored];
-            localStorage.setItem('grok_vault_links_v1_4', JSON.stringify(newData));
-            return { data: newItems };
-        }
-        return axios.post(`${API_URL}/links/bulk`, { links, tags });
-    },
-    updateLink: async (id, updates) => {
-        if (IS_DEMO) {
-            const stored = JSON.parse(localStorage.getItem('grok_vault_links_v1_4') || '[]');
-            const newData = stored.map(link => link.id === id ? { ...link, ...updates } : link);
-            localStorage.setItem('grok_vault_links_v1_4', JSON.stringify(newData));
-            return { data: { success: true } };
-        }
-        return axios.patch(`${API_URL}/links/${id}`, updates);
-    },
-    bulkPatch: async (ids, updates) => {
-        if (IS_DEMO) {
-            const stored = JSON.parse(localStorage.getItem('grok_vault_links_v1_4') || '[]');
-            const newData = stored.map(link => ids.includes(link.id) ? { ...link, ...updates } : link);
-            localStorage.setItem('grok_vault_links_v1_4', JSON.stringify(newData));
-            return { data: { success: true } };
-        }
-        return axios.post(`${API_URL}/links/bulk-patch`, { ids, updates });
-    },
-    bulkDelete: async (ids) => {
-        if (IS_DEMO) {
-            const stored = JSON.parse(localStorage.getItem('grok_vault_links_v1_4') || '[]');
-            const newData = stored.filter(link => !ids.includes(link.id));
-            localStorage.setItem('grok_vault_links_v1_4', JSON.stringify(newData));
-            return { data: { success: true } };
-        }
-        return axios.post(`${API_URL}/links/bulk-delete`, { ids });
-    },
-    globalRenameTag: async (oldTag, newTag) => {
-        if (IS_DEMO) {
-            const stored = JSON.parse(localStorage.getItem('grok_vault_links_v1_4') || '[]');
-            let changed = false;
-            const newData = stored.map(link => {
-                if (link.tags && link.tags.includes(oldTag)) {
-                    link.tags = link.tags.map(t => t === oldTag ? newTag : t);
-                    link.tags = Array.from(new Set(link.tags));
-                    changed = true;
-                }
-                return link;
-            });
-            if (changed) localStorage.setItem('grok_vault_links_v1_4', JSON.stringify(newData));
-            return { data: { success: true } };
-        }
-        return axios.post(`${API_URL}/tags/rename`, { oldTag, newTag });
-    },
-    globalDeleteTag: async (tag) => {
-        if (IS_DEMO) {
-            const stored = JSON.parse(localStorage.getItem('grok_vault_links_v1_4') || '[]');
-            let changed = false;
-            const newData = stored.map(link => {
-                if (link.tags && link.tags.includes(tag)) {
-                    link.tags = link.tags.filter(t => t !== tag);
-                    changed = true;
-                }
-                return link;
-            });
-            if (changed) localStorage.setItem('grok_vault_links_v1_4', JSON.stringify(newData));
-            return { data: { success: true } };
-        }
-        return axios.post(`${API_URL}/tags/delete`, { tag });
-    },
-    importData: async (dataToImport) => {
-        if (IS_DEMO) {
-            localStorage.setItem('grok_vault_links_v1_4', JSON.stringify(dataToImport));
-            return { data: { success: true, count: dataToImport.length } };
-        }
-        return axios.post(`${API_URL}/links/import`, { data: dataToImport });
-    },
-    getExportUrl: () => {
-        if (IS_DEMO) {
-            const stored = localStorage.getItem('grok_vault_links_v1_4') || '[]';
-            const blob = new Blob([stored], { type: 'application/json' });
-            return URL.createObjectURL(blob);
-        }
-        return `${API_URL}/links/export`;
-    },
-    backupThumbnail: async (id, url) => {
-        if (IS_DEMO) return { data: { success: false, error: 'Backup not supported in demo' } };
-        return axios.post(`${API_URL}/backup-thumbnail`, { id, url });
-    }
-};
 
 const TRANSLATIONS = {
     'en': {
@@ -204,20 +92,32 @@ const TRANSLATIONS = {
         deleteTag: 'Delete Tag',
         globalRenamePrompt: 'Rename tag "{tag}" to:',
         globalDeleteConfirm: 'Are you sure you want to delete tag "{tag}" from all items?',
-        exportSuccess: 'Data exported to your browser\'s default download path.',
+        exportSuccess: 'Data exported to your system\'s default download folder.',
         selectAll: 'Select All',
         deselectAll: 'Deselect All',
         settings: 'Settings',
         localBackup: 'Local Image Backup',
         defaultBlur: 'Default Privacy Blur',
-        backupAll: 'Backup All Existing Images',
-        backupAllDesc: 'Download all CDN images to your local storage',
+        backupAll: 'Download All Images to Computer',
+        backupAllDesc: 'Download all CDN images to your system folder',
         localBackupDesc: 'Automatically download thumbnails to local storage',
         defaultBlurDesc: 'Always start with privacy blur enabled',
         pipPreview: 'Mini Preview',
+        openExternal: 'Open in Grok',
+        fullscreen: 'Fullscreen View',
         addedItems: 'Added {count} new items.',
         skippedDuplicates: '{count} duplicates skipped.',
-        backingUp: 'Backing up {current}/{total}...'
+        backingUp: 'Downloading {current}/{total}...',
+        lanAccess: 'LAN Access',
+        lanAccessDesc: 'Allow other devices on your Wi-Fi to access this vault',
+        lanAddress: 'Local Address',
+        systemDownloads: 'Saves to system Downloads folder',
+        importData: 'Import Vault (JSON)',
+        exportData: 'Export Vault (JSON)',
+        dataManagement: 'Data Management',
+        privacy: 'Privacy',
+        backup: 'Backup',
+        network: 'Network'
     },
     'zh-cn': {
         title: 'Grok Imagine AI Vault',
@@ -260,20 +160,32 @@ const TRANSLATIONS = {
         deleteTag: '删除标签',
         globalRenamePrompt: '将标签 "{tag}" 重命名为：',
         globalDeleteConfirm: '确定要从所有项目中删除标签 "{tag}" 吗？',
-        exportSuccess: '数据已导出至浏览器默认下载路径。',
+        exportSuccess: '数据已导出至系统默认下载文件夹。',
         selectAll: '全选',
-        deselectAll: '取消全选',
+        deselectAll: '取消全選',
         settings: '设置',
         localBackup: '图片本地备份',
         defaultBlur: '默认隐私模糊',
-        backupAll: '备份所有现有图片',
-        backupAllDesc: '将所有 CDN 图片下载到您的本地存储',
-        localBackupDesc: '自动下载缩略图到本地存储',
+        backupAll: '下载所有图片到电脑',
+        backupAllDesc: '将所有 CDN 图片下载到您的系统下载文件夹',
+        localBackupDesc: '加入链接的同时将图片下载到本地空间。',
         defaultBlurDesc: '启动时默认开启隐私模糊',
         pipPreview: '迷你预览',
+        openExternal: '在 Grok 中开启',
+        fullscreen: '全屏查看',
         addedItems: '已添加 {count} 個新项目。',
         skippedDuplicates: '已略过 {count} 个重复链接。',
-        backingUp: '正在备份 {current}/{total}...'
+        backingUp: '正在下载 {current}/{total}...',
+        lanAccess: '区域网络访问',
+        lanAccessDesc: '允许同一 Wi-Fi 下的其他设备访问此保管库',
+        lanAddress: '局域网地址',
+        systemDownloads: '保存至系统下载文件夹',
+        importData: '导入保管库 (JSON)',
+        exportData: '导出保管库 (JSON)',
+        dataManagement: '数据管理',
+        privacy: '隐私',
+        backup: '备份',
+        network: '网络'
     },
     'zh-tw': {
         title: 'Grok Imagine AI Vault',
@@ -316,20 +228,32 @@ const TRANSLATIONS = {
         deleteTag: '刪除標籤',
         globalRenamePrompt: '將標籤「{tag}」重新命名為：',
         globalDeleteConfirm: '確定要從所有項目中刪除標籤「{tag}」嗎？',
-        exportSuccess: '資料已匯出至瀏覽器預設的下載路徑。',
+        exportSuccess: '資料已匯出至系統預設下載資料夾。',
         selectAll: '全選',
         deselectAll: '取消全選',
         settings: '設置',
         localBackup: '圖片本地備份',
         defaultBlur: '預設隱私模糊',
-        backupAll: '備份所有現有圖片',
-        backupAllDesc: '將所有 CDN 圖片下載到您的本地存儲',
-        localBackupDesc: '自動下載縮圖到本地存儲',
+        backupAll: '下載所有圖片到電腦',
+        backupAllDesc: '將所有 CDN 圖片下載到您的系統下載資料夾',
+        localBackupDesc: '加入連結的同時將圖片下載到本地空間。',
         defaultBlurDesc: '啟動時預設開啟隱私模糊',
         pipPreview: '子母畫面預覽',
+        openExternal: '在 Grok 中開啟',
+        fullscreen: '全螢幕查看',
         addedItems: '已加入 {count} 個新項目。',
         skippedDuplicates: '已略過 {count} 個重複連結。',
-        backingUp: '正在備份 {current}/{total}...'
+        backingUp: '正在下載 {current}/{total}...',
+        lanAccess: '區域網路存取',
+        lanAccessDesc: '允許同一 Wi-Fi 下的其他裝置存取此保管庫',
+        lanAddress: '區域網址',
+        systemDownloads: '儲存至系統下載資料夾',
+        importData: '匯入保管庫 (JSON)',
+        exportData: '匯出保管庫 (JSON)',
+        dataManagement: '數據管理',
+        privacy: '隱私',
+        backup: '備份',
+        network: '網路'
     },
     'ja': {
         title: 'Grok Imagine AI Vault',
@@ -372,42 +296,125 @@ const TRANSLATIONS = {
         deleteTag: 'タグを削除',
         globalRenamePrompt: 'タグ「{tag}」を以下に変更：',
         globalDeleteConfirm: 'すべての項目からタグ「{tag}」を削除してもよろしいですか？',
-        exportSuccess: 'データはブラウザのデフォルトの保存先にエクスポートされました。',
+        exportSuccess: 'データはシステムのデフォルトのダウンロードフォルダにエクスポートされました。',
         selectAll: 'すべて選択',
         deselectAll: '選択解除',
         settings: '設定',
         localBackup: '画像のローカルバックアップ',
         defaultBlur: 'デフォルトのプライバシーぼかし',
-        backupAll: '既存のすべての画像をバックアップ',
-        backupAllDesc: 'すべてのCDN画像をローカルストレージにダウンロードします',
+        backupAll: 'すべての画像をコンピュータにダウンロード',
+        backupAllDesc: 'すべてのCDN画像をシステムのダウンロードフォルダに保存します',
         localBackupDesc: 'サムネイルをローカルストレージに自動保存',
         defaultBlurDesc: '起動時にプライバシーぼかしを有効にする',
         pipPreview: 'ミニプレビュー',
+        openExternal: 'Grok で開く',
+        fullscreen: 'フルスクリーン表示',
         addedItems: '{count} 個の新しい項目を追加しました。',
         skippedDuplicates: '{count} 個の重複リンクをスキップしました。',
-        backingUp: 'バックアップ中 {current}/{total}...'
+        backingUp: 'ダウンロード中 {current}/{total}...',
+        lanAccess: 'LAN アクセス',
+        lanAccessDesc: '同じ Wi-Fi 內の其他デバイスからのアクセスを許可',
+        lanAddress: 'ローカルアドレス',
+        systemDownloads: 'システムのダウンロードフォルダに保存されます',
+        importData: '保管庫をインポート (JSON)',
+        exportData: '保管庫をエクスポート (JSON)',
+        dataManagement: 'データ管理',
+        privacy: 'プライバシー',
+        backup: 'バックアップ',
+        network: 'ネットワーク'
     }
 };
 
+const getDynamicApiUrl = (enabled) => {
+    if (enabled && typeof window !== 'undefined') {
+        return `http://${window.location.hostname}:3002/api`;
+    }
+    return 'http://localhost:3002/api';
+};
+
+function DerivativeFanOut({ derivatives, isActive }) {
+    if (!derivatives || derivatives.length === 0) return null;
+
+    return (
+        <div className="absolute inset-0 pointer-events-none z-50">
+            <AnimatePresence>
+                {isActive && derivatives.map((item, idx) => {
+                    // Calculate positions in a radial fan-out
+                    const angle = (idx - (derivatives.length - 1) / 2) * 35; // Degrees
+                    const distance = 160; // Distance from center
+
+                    return (
+                        <motion.div
+                            key={item.id}
+                            initial={{ scale: 0, opacity: 0, x: 0, y: 0 }}
+                            animate={{
+                                scale: 1,
+                                opacity: 1,
+                                x: Math.sin(angle * Math.PI / 180) * distance,
+                                y: -Math.cos(angle * Math.PI / 180) * distance - 20
+                            }}
+                            exit={{ scale: 0, opacity: 0, x: 0, y: 0 }}
+                            transition={{ type: 'spring', damping: 15, stiffness: 200, delay: idx * 0.05 }}
+                            className="absolute left-1/2 top-1/2 -ml-10 -mt-10 w-20 h-20 pointer-events-auto"
+                        >
+                            <div className="w-full h-full rounded-2xl overflow-hidden border-2 border-white/20 shadow-2xl bg-zinc-900 group/item relative">
+                                {item.type === 'video' ? (
+                                    <VideoThumbnail url={item.thumbnail} videoUrl={item.url} />
+                                ) : (
+                                    <img src={item.thumbnail} className="w-full h-full object-cover" alt="" />
+                                )}
+                                <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/item:opacity-100 transition-opacity">
+                                    {item.type === 'video' ? <Play className="w-6 h-6 text-white fill-white" /> : <ExternalLink className="w-6 h-6 text-white" />}
+                                </div>
+                            </div>
+                        </motion.div>
+                    );
+                })}
+            </AnimatePresence>
+        </div>
+    );
+}
+
+function VideoThumbnail({ url, videoUrl }) {
+    const [hover, setHover] = useState(false);
+    const videoRef = React.useRef(null);
+
+    return (
+        <div
+            className="w-full h-full relative"
+            onMouseEnter={() => { setHover(true); videoRef.current?.play(); }}
+            onMouseLeave={() => { setHover(false); if (videoRef.current) { videoRef.current.pause(); videoRef.current.currentTime = 0; } }}
+        >
+            <img src={url} className={cn("w-full h-full object-cover transition-opacity duration-300", hover ? "opacity-0" : "opacity-100")} alt="" />
+            <video
+                ref={videoRef}
+                src={videoUrl}
+                loop
+                muted
+                playsInline
+                preload="none"
+                className={cn("absolute inset-0 w-full h-full object-cover transition-opacity duration-300", hover ? "opacity-100" : "opacity-0")}
+            />
+            <div className="absolute bottom-1.5 right-1.5 bg-black/60 backdrop-blur-md rounded-full p-1 border border-white/10 pointer-events-none group-hover:scale-110 transition-transform">
+                <Stars className="w-2.5 h-2.5 text-blue-400" />
+            </div>
+        </div>
+    );
+}
+
 export default function App() {
-    const [links, setLinks] = useState([]);
-    const [search, setSearch] = useState('');
-    const [newUrl, setNewUrl] = useState('');
-    const [loading, setLoading] = useState(false);
-    const [isBlurred, setIsBlurred] = useState(true);
-    const [newTags, setNewTags] = useState('');
-    const [selectedTags, setSelectedTags] = useState(new Set());
-    const [moreTagsOpen, setMoreTagsOpen] = useState(false);
-    const [activeGrokUrl, setActiveGrokUrl] = useState(null);
-    const [dragOverId, setDragOverId] = useState(null);
-    const [editingId, setEditingId] = useState(null);
-    const [tempTitle, setTempTitle] = useState('');
     const [language, setLanguage] = useState('zh-tw');
     const [langOpen, setLangOpen] = useState(false);
-    const [sortBy, setSortBy] = useState('newest'); // newest, oldest, titleAz
-    const [sortOpen, setSortOpen] = useState(false);
-    const [tagManagerOpen, setTagManagerOpen] = useState(false);
     const [notifications, setNotifications] = useState([]);
+
+    const t = (key, params = {}) => {
+        const langData = TRANSLATIONS[language] || TRANSLATIONS['en'];
+        let text = langData[key] || key;
+        Object.keys(params).forEach(p => {
+            text = text.replace(`{${p}}`, params[p]);
+        });
+        return text;
+    };
 
     const showNotification = (message, type = 'info') => {
         const id = Date.now();
@@ -417,44 +424,186 @@ export default function App() {
         }, 5000);
     };
 
-    const t = (key, params = {}) => {
-        let text = TRANSLATIONS[language][key] || key;
-        Object.keys(params).forEach(p => {
-            text = text.replace(`{${p}}`, params[p]);
-        });
-        return text;
-    };
-
-    // Settings State
+    const [links, setLinks] = useState([]);
+    const [search, setSearch] = useState('');
+    const [newUrl, setNewUrl] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [newTags, setNewTags] = useState('');
+    const [selectedTags, setSelectedTags] = useState(new Set());
+    const [moreTagsOpen, setMoreTagsOpen] = useState(false);
+    const [activeGrokUrl, setActiveGrokUrl] = useState(null);
+    const [dragOverId, setDragOverId] = useState(null);
+    const [editingId, setEditingId] = useState(null);
+    const [tempTitle, setTempTitle] = useState('');
+    const [sortBy, setSortBy] = useState('newest');
+    const [sortOpen, setSortOpen] = useState(false);
+    const [tagManagerOpen, setTagManagerOpen] = useState(false);
+    const [fullscreenId, setFullscreenId] = useState(null);
+    const [lastSelectedId, setLastSelectedId] = useState(null);
     const [settingsOpen, setSettingsOpen] = useState(false);
+
+    const [lanAccessEnabled, setLanAccessEnabled] = useState(() => {
+        return localStorage.getItem('grok_vault_lan_access_enabled') === 'true';
+    });
+    const [lanIp, setLanIp] = useState('localhost');
+
+    const [defaultBlurEnabled, setDefaultBlurEnabled] = useState(() => {
+        return localStorage.getItem('grok_vault_default_blur_enabled') !== 'false';
+    });
+
+    const [isBlurred, setIsBlurred] = useState(() => {
+        return localStorage.getItem('grok_vault_default_blur_enabled') !== 'false';
+    });
+
     const [backupEnabled, setBackupEnabled] = useState(() => {
         return localStorage.getItem('grok_vault_backup_enabled') === 'true';
     });
-    const [defaultBlurEnabled, setDefaultBlurEnabled] = useState(() => {
-        return localStorage.getItem('grok_vault_default_blur_enabled') !== 'false'; // Default to true
-    });
+
+    const API_URL = useMemo(() => getDynamicApiUrl(lanAccessEnabled), [lanAccessEnabled]);
+
+    const api = useMemo(() => ({
+        getLinks: () => {
+            if (IS_DEMO) {
+                const stored = localStorage.getItem('grok_vault_links_v1_4');
+                if (!stored) {
+                    localStorage.setItem('grok_vault_links_v1_4', JSON.stringify(DEMO_INITIAL_DATA));
+                    return { data: DEMO_INITIAL_DATA };
+                }
+                return { data: JSON.parse(stored) };
+            }
+            return axios.get(`${API_URL}/links`);
+        },
+        addLink: (url, tags) => {
+            if (IS_DEMO) {
+                const newItem = {
+                    id: Date.now().toString(),
+                    url,
+                    title: 'Untitled AI Image',
+                    tags: tags || [],
+                    thumbnail: null,
+                    addedAt: new Date().toISOString()
+                };
+                const stored = JSON.parse(localStorage.getItem('grok_vault_links_v1_4') || '[]');
+                const newData = [newItem, ...stored];
+                localStorage.setItem('grok_vault_links_v1_4', JSON.stringify(newData));
+                return { data: newItem };
+            }
+            return axios.post(`${API_URL}/links`, { url, tags });
+        },
+        addBulk: (links, tags) => {
+            if (IS_DEMO) {
+                const newItems = links.map((l, i) => ({
+                    id: (Date.now() + i).toString(),
+                    url: l.url,
+                    title: 'Untitled AI Image',
+                    tags: tags || [],
+                    thumbnail: l.thumbnail || null,
+                    addedAt: new Date().toISOString()
+                }));
+                const stored = JSON.parse(localStorage.getItem('grok_vault_links_v1_4') || '[]');
+                const newData = [...newItems, ...stored];
+                localStorage.setItem('grok_vault_links_v1_4', JSON.stringify(newData));
+                return { data: newItems };
+            }
+            return axios.post(`${API_URL}/links/bulk`, { links, tags });
+        },
+        updateLink: (id, updates) => {
+            if (IS_DEMO) {
+                const stored = JSON.parse(localStorage.getItem('grok_vault_links_v1_4') || '[]');
+                const newData = stored.map(link => link.id === id ? { ...link, ...updates } : link);
+                localStorage.setItem('grok_vault_links_v1_4', JSON.stringify(newData));
+                return { data: { success: true } };
+            }
+            return axios.patch(`${API_URL}/links/${id}`, updates);
+        },
+        bulkPatch: (ids, updates) => {
+            if (IS_DEMO) {
+                const stored = JSON.parse(localStorage.getItem('grok_vault_links_v1_4') || '[]');
+                const newData = stored.map(link => ids.includes(link.id) ? { ...link, ...updates } : link);
+                localStorage.setItem('grok_vault_links_v1_4', JSON.stringify(newData));
+                return { data: { success: true } };
+            }
+            return axios.post(`${API_URL}/links/bulk-patch`, { ids, updates });
+        },
+        bulkDelete: (ids) => {
+            if (IS_DEMO) {
+                const stored = JSON.parse(localStorage.getItem('grok_vault_links_v1_4') || '[]');
+                const newData = stored.filter(link => !ids.includes(link.id));
+                localStorage.setItem('grok_vault_links_v1_4', JSON.stringify(newData));
+                return { data: { success: true } };
+            }
+            return axios.post(`${API_URL}/links/bulk-delete`, { ids });
+        },
+        globalRenameTag: (oldTag, newTag) => {
+            if (IS_DEMO) {
+                const stored = JSON.parse(localStorage.getItem('grok_vault_links_v1_4') || '[]');
+                let changed = false;
+                const newData = stored.map(link => {
+                    if (link.tags && link.tags.includes(oldTag)) {
+                        link.tags = link.tags.map(t => t === oldTag ? newTag : t);
+                        link.tags = Array.from(new Set(link.tags));
+                        changed = true;
+                    }
+                    return link;
+                });
+                if (changed) localStorage.setItem('grok_vault_links_v1_4', JSON.stringify(newData));
+                return { data: { success: true } };
+            }
+            return axios.post(`${API_URL}/tags/rename`, { oldTag, newTag });
+        },
+        globalDeleteTag: (tag) => {
+            if (IS_DEMO) {
+                const stored = JSON.parse(localStorage.getItem('grok_vault_links_v1_4') || '[]');
+                let changed = false;
+                const newData = stored.map(link => {
+                    if (link.tags && link.tags.includes(tag)) {
+                        link.tags = link.tags.filter(t => t !== tag);
+                        changed = true;
+                    }
+                    return link;
+                });
+                if (changed) localStorage.setItem('grok_vault_links_v1_4', JSON.stringify(newData));
+                return { data: { success: true } };
+            }
+            return axios.post(`${API_URL}/tags/delete`, { tag });
+        },
+        importData: (dataToImport) => {
+            if (IS_DEMO) {
+                localStorage.setItem('grok_vault_links_v1_4', JSON.stringify(dataToImport));
+                return { data: { success: true, count: dataToImport.length } };
+            }
+            return axios.post(`${API_URL}/links/import`, { data: dataToImport });
+        },
+        getExportUrl: () => {
+            if (IS_DEMO) {
+                const stored = localStorage.getItem('grok_vault_links_v1_4') || '[]';
+                const blob = new Blob([stored], { type: 'application/json' });
+                return URL.createObjectURL(blob);
+            }
+            return `${API_URL}/links/export`;
+        },
+        backupThumbnail: (id, url) => {
+            if (IS_DEMO) return { data: { success: false, error: 'Backup not supported in demo' } };
+            return axios.post(`${API_URL}/backup-thumbnail`, { id, url });
+        }
+    }), [API_URL]);
 
     useEffect(() => {
-        localStorage.setItem('grok_vault_backup_enabled', backupEnabled);
-    }, [backupEnabled]);
+        localStorage.setItem('grok_vault_lan_access_enabled', lanAccessEnabled);
+    }, [lanAccessEnabled]);
 
     useEffect(() => {
         localStorage.setItem('grok_vault_default_blur_enabled', defaultBlurEnabled);
-    }, [defaultBlurEnabled]);
-
-    useEffect(() => {
-        // Initialize blur state based on defaultBlurEnabled preference
-        const lastBlur = localStorage.getItem('grok_vault_last_blur_state');
-        if (!defaultBlurEnabled) {
-            setIsBlurred(lastBlur === 'true');
-        } else {
-            setIsBlurred(true);
-        }
+        setIsBlurred(defaultBlurEnabled);
     }, [defaultBlurEnabled]);
 
     useEffect(() => {
         localStorage.setItem('grok_vault_last_blur_state', isBlurred);
     }, [isBlurred]);
+
+    useEffect(() => {
+        localStorage.setItem('grok_vault_backup_enabled', backupEnabled);
+    }, [backupEnabled]);
 
 
 
@@ -464,6 +613,22 @@ export default function App() {
     const [selectionRect, setSelectionRect] = useState(null); // { x1, y1, x2, y2 }
     const [isSelecting, setIsSelecting] = useState(false);
     const gridRef = React.useRef(null);
+
+    useEffect(() => {
+        const fetchNetworkInfo = async () => {
+            if (lanAccessEnabled && !IS_DEMO) {
+                try {
+                    const res = await axios.get(`${API_URL}/network-info`);
+                    if (res.data && res.data.lanIp) {
+                        setLanIp(res.data.lanIp);
+                    }
+                } catch (err) {
+                    console.error('Failed to fetch LAN IP:', err);
+                }
+            }
+        };
+        fetchNetworkInfo();
+    }, [lanAccessEnabled, API_URL]);
 
     useEffect(() => {
         fetchLinks();
@@ -502,9 +667,11 @@ export default function App() {
     const fetchLinks = async () => {
         try {
             const { data } = await api.getLinks();
+            console.log(`Fetched ${data?.length || 0} links`);
             setLinks(Array.isArray(data) ? [...data].reverse() : []);
         } catch (err) {
             console.error('Failed to fetch links', err);
+            showNotification(err.message, 'error');
         }
     };
 
@@ -1027,30 +1194,6 @@ export default function App() {
                                     </AnimatePresence>
                                 </div>
 
-                                <div className="w-px h-4 bg-zinc-800 mx-1" />
-
-                                {/* Export */}
-                                <button
-                                    onClick={exportData}
-                                    title={t('exportData')}
-                                    className="p-2.5 hover:bg-zinc-800 rounded-xl transition-colors text-zinc-400 group"
-                                >
-                                    <Upload className="w-5 h-5 group-hover:text-emerald-400 transition-colors" />
-                                </button>
-
-                                {/* Import */}
-                                <div className="relative flex items-center justify-center">
-                                    <input
-                                        type="file"
-                                        accept=".json"
-                                        onChange={importData}
-                                        className="absolute inset-0 opacity-0 cursor-pointer z-10"
-                                        title={t('importData')}
-                                    />
-                                    <button className="p-2.5 hover:bg-zinc-800 rounded-xl transition-colors text-zinc-400 group">
-                                        <Download className="w-5 h-5 group-hover:text-blue-400 transition-colors" />
-                                    </button>
-                                </div>
 
                                 <div className="w-px h-4 bg-zinc-800 mx-1" />
 
@@ -1287,7 +1430,7 @@ export default function App() {
                     )}
 
                     <div className="flex gap-6 items-start">
-                        {masonryColumns.map((col, colIndex) => (
+                        {masonryColumns && masonryColumns.map((col, colIndex) => (
                             <div key={colIndex} className="flex-1 space-y-6 flex flex-col">
                                 <AnimatePresence mode="popLayout">
                                     {col.map((link) => (
@@ -1299,6 +1442,9 @@ export default function App() {
                                                     toggleSelect(link.id);
                                                     e.preventDefault();
                                                     e.stopPropagation();
+                                                } else {
+                                                    // Toggle fan-out on click
+                                                    setLastSelectedId(prev => prev === link.id ? null : link.id);
                                                 }
                                             }}
                                             layout
@@ -1309,14 +1455,22 @@ export default function App() {
                                             onDragLeave={() => setDragOverId(null)}
                                             onDrop={(e) => { setDragOverId(null); handleExternalDrop(e, link.id); }}
                                             className={cn(
-                                                "group relative bg-zinc-900 rounded-3xl overflow-hidden border transition-all duration-300 w-full",
+                                                "group relative bg-zinc-900 rounded-3xl border transition-all duration-300 w-full cursor-pointer",
+                                                lastSelectedId === link.id ? "overflow-visible z-[100]" : "overflow-hidden",
                                                 selectedIds.has(link.id)
                                                     ? "border-white ring-1 ring-white/50 scale-[1.02]"
                                                     : dragOverId === link.id
                                                         ? "border-emerald-500 ring-2 ring-emerald-500/20 scale-[1.05] z-40"
-                                                        : "border-zinc-800 hover:border-zinc-700 shadow-xl"
+                                                        : lastSelectedId === link.id
+                                                            ? "border-blue-500 ring-2 ring-blue-500/20"
+                                                            : "border-zinc-800 hover:border-zinc-700 shadow-xl"
                                             )}
                                         >
+                                            {/* Derivative Fan-out UI */}
+                                            <DerivativeFanOut
+                                                derivatives={link.derivatives}
+                                                isActive={lastSelectedId === link.id}
+                                            />
                                             {/* Selection Checkbox (Visible on hover or if selected) */}
                                             <div
                                                 onClick={(e) => {
@@ -1368,18 +1522,18 @@ export default function App() {
                                                         <ExternalLink className="w-5 h-5" />
                                                     </a>
                                                     <button
+                                                        onClick={(e) => { if (!e.shiftKey) e.stopPropagation(); setFullscreenId(link.id); }}
+                                                        title={t('fullscreen')}
+                                                        className="p-3 bg-white text-black rounded-full hover:bg-gray-200 transition-colors"
+                                                    >
+                                                        <Maximize className="w-5 h-5" />
+                                                    </button>
+                                                    <button
                                                         onClick={(e) => { if (!e.shiftKey) e.stopPropagation(); launchPip(link.url, link.id); }}
                                                         title={t('pipPreview')}
                                                         className="p-3 bg-amber-500 text-white rounded-full hover:bg-amber-400 transition-colors"
                                                     >
-                                                        <Maximize2 className="w-5 h-5" />
-                                                    </button>
-                                                    <button
-                                                        onClick={(e) => { if (!e.shiftKey) e.stopPropagation(); updateThumbnail(link.id, link.url); }}
-                                                        title={t('relaunch')}
-                                                        className="p-3 bg-slate-700 text-white rounded-full hover:bg-slate-600 transition-colors"
-                                                    >
-                                                        <RefreshCw className="w-5 h-5" />
+                                                        <Aperture className="w-5 h-5" />
                                                     </button>
                                                 </div>
                                             </div>
@@ -1601,23 +1755,39 @@ export default function App() {
                 {/* Settings Modal */}
                 <AnimatePresence>
                     {settingsOpen && (
-                            <SettingsModal
-                                onClose={() => setSettingsOpen(false)}
-                                links={links}
-                                setLinks={setLinks}
-                                backupEnabled={backupEnabled}
-                                setBackupEnabled={setBackupEnabled}
-                                defaultBlurEnabled={defaultBlurEnabled}
-                                setDefaultBlurEnabled={setDefaultBlurEnabled}
-                                t={t}
-                                IS_DEMO={IS_DEMO}
-                                api={api}
-                                showNotification={showNotification}
-                            />
-                        )}
-                    </AnimatePresence>
+                        <SettingsModal
+                            onClose={() => setSettingsOpen(false)}
+                            links={links}
+                            setLinks={setLinks}
+                            lanAccessEnabled={lanAccessEnabled}
+                            setLanAccessEnabled={setLanAccessEnabled}
+                            lanIp={lanIp}
+                            defaultBlurEnabled={defaultBlurEnabled}
+                            setDefaultBlurEnabled={setDefaultBlurEnabled}
+                            backupEnabled={backupEnabled}
+                            setBackupEnabled={setBackupEnabled}
+                            t={t}
+                            IS_DEMO={IS_DEMO}
+                            api={api}
+                            showNotification={showNotification}
+                            importData={importData}
+                            exportData={exportData}
+                        />
+                    )}
+                </AnimatePresence>
 
-                    <NotificationToast notifications={notifications} />
+                <NotificationToast notifications={notifications} />
+
+                <AnimatePresence>
+                    {fullscreenId && (
+                        <LightboxOverlay
+                            id={fullscreenId}
+                            links={filteredLinks}
+                            onClose={() => setFullscreenId(null)}
+                            onNavigate={(newId) => setFullscreenId(newId)}
+                        />
+                    )}
+                </AnimatePresence>
 
             </div>
 
@@ -1656,44 +1826,47 @@ export default function App() {
 
 // --- Sub-components ---
 
-function SettingsModal({ onClose, links, setLinks, backupEnabled, setBackupEnabled, defaultBlurEnabled, setDefaultBlurEnabled, t, IS_DEMO, api, showNotification }) {
+function SettingsModal({ onClose, links, setLinks, backupEnabled, setBackupEnabled, defaultBlurEnabled, setDefaultBlurEnabled, lanAccessEnabled, setLanAccessEnabled, lanIp, t, IS_DEMO, api, showNotification, importData, exportData }) {
     const [isBackingUp, setIsBackingUp] = useState(false);
     const [backupProgress, setBackupProgress] = useState({ current: 0, total: 0 });
+    const [activeTab, setActiveTab] = useState('privacy'); // privacy, backup, network
 
     const handleBackupAll = async () => {
         if (isBackingUp) return;
-
         const cdnLinks = links.filter(l => l.thumbnail && l.thumbnail.startsWith('http'));
         if (cdnLinks.length === 0) {
             showNotification(t('noLinks'), 'info');
             return;
         }
-
         setIsBackingUp(true);
         setBackupProgress({ current: 0, total: cdnLinks.length });
-
-        let successCount = 0;
-        try {
-            for (let i = 0; i < cdnLinks.length; i++) {
-                const link = cdnLinks[i];
-                setBackupProgress({ current: i + 1, total: cdnLinks.length });
-                try {
-                    await api.backupThumbnail(link.id, link.thumbnail);
-                    successCount++;
-                } catch (err) {
-                    console.error(`Failed to backup ${link.id}:`, err);
-                }
+        for (let i = 0; i < cdnLinks.length; i++) {
+            const link = cdnLinks[i];
+            setBackupProgress({ current: i + 1, total: cdnLinks.length });
+            try {
+                const uuid = link.url.match(/([a-f0-9-]{36})/i)?.[1] || link.id;
+                const fileName = `Grok_${uuid}.jpg`;
+                const downloadUrl = `${API_URL}/download-proxy?url=${encodeURIComponent(link.thumbnail)}&filename=${encodeURIComponent(fileName)}`;
+                const a = document.createElement('a');
+                a.href = downloadUrl;
+                a.download = fileName;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                await new Promise(r => setTimeout(r, 400));
+            } catch (err) {
+                console.error(`Failed to trigger download for ${link.id}:`, err);
             }
-            const res = await api.getLinks();
-            setLinks(Array.isArray(res.data) ? [...res.data].reverse() : []);
-            showNotification(t('exportSuccess'), 'success');
-        } catch (err) {
-            console.error(err);
-            showNotification(err.message, 'error');
-        } finally {
-            setIsBackingUp(false);
         }
+        setIsBackingUp(false);
+        showNotification(t('exportSuccess'), 'success');
     };
+
+    const tabs = [
+        { id: 'privacy', label: t('privacy'), icon: Shield },
+        { id: 'backup', label: t('backup'), icon: Database },
+        { id: 'network', label: t('network'), icon: Globe }
+    ];
 
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
@@ -1702,63 +1875,179 @@ function SettingsModal({ onClose, links, setLinks, backupEnabled, setBackupEnabl
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 onClick={onClose}
-                className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+                className="absolute inset-0 bg-black/80 backdrop-blur-md"
             />
             <motion.div
-                initial={{ scale: 0.95, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.95, opacity: 0 }}
-                className="relative w-full max-w-md bg-[#16181c] border border-white/10 rounded-3xl overflow-hidden shadow-2xl"
+                initial={{ scale: 0.95, opacity: 0, y: 20 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                exit={{ scale: 0.95, opacity: 0, y: 20 }}
+                className="relative w-full max-w-2xl bg-[#16181c] border border-white/10 rounded-[32px] overflow-hidden shadow-2xl flex h-[500px]"
             >
-                <div className="p-6 border-b border-white/5 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <Settings className="w-5 h-5 text-blue-400" />
-                        <h3 className="text-xl font-bold text-white">{t('settings')}</h3>
-                    </div>
-                    <button onClick={onClose} className="p-2 hover:bg-white/5 rounded-full transition-colors">
-                        <X className="w-5 h-5 text-white/40" />
-                    </button>
-                </div>
-
-                <div className="p-6 space-y-6">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <h4 className="text-white font-medium">{t('localBackup')}</h4>
-                            <p className="text-xs text-white/40 mt-1">{t('localBackupDesc')}</p>
+                {/* Sidebar */}
+                <div className="w-48 border-r border-white/5 bg-black/20 p-4 flex flex-col gap-2">
+                    <div className="px-3 py-4 mb-2 flex items-center gap-2">
+                        <div className="w-8 h-8 bg-blue-500/20 rounded-xl flex items-center justify-center">
+                            <Settings className="w-5 h-5 text-blue-400" />
                         </div>
-                        <IOSSwitch checked={backupEnabled} onChange={setBackupEnabled} />
+                        <span className="font-bold text-white tracking-tight">{t('settings')}</span>
                     </div>
 
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <h4 className="text-white font-medium">{t('defaultBlur')}</h4>
-                            <p className="text-xs text-white/40 mt-1">{t('defaultBlurDesc')}</p>
-                        </div>
-                        <IOSSwitch checked={defaultBlurEnabled} onChange={setDefaultBlurEnabled} />
-                    </div>
-
-                    <div className="pt-4 border-t border-white/5">
+                    {tabs.map(tab => (
                         <button
-                            onClick={handleBackupAll}
-                            disabled={isBackingUp || IS_DEMO}
+                            key={tab.id}
+                            onClick={() => setActiveTab(tab.id)}
                             className={cn(
-                                "w-full p-4 rounded-xl border border-white/10 flex items-center justify-between group transition-all text-sm",
-                                (isBackingUp || IS_DEMO) ? "opacity-50 cursor-not-allowed" : "hover:bg-white/5 hover:border-blue-500/50"
+                                "flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-200 group text-sm font-medium",
+                                activeTab === tab.id
+                                    ? "bg-blue-500/10 text-blue-400"
+                                    : "text-zinc-500 hover:text-white hover:bg-white/5"
                             )}
                         >
-                            <div className="text-left">
-                                <div className="text-white font-medium flex items-center gap-2">
-                                    <Download className="w-4 h-4 text-blue-400" />
-                                    {isBackingUp ? (
-                                        <span>{t('backingUp', { current: backupProgress.current, total: backupProgress.total })}</span>
-                                    ) : (
-                                        t('backupAll')
-                                    )}
-                                </div>
-                                <p className="text-[10px] text-white/40 mt-1">{t('backupAllDesc')}</p>
-                            </div>
-                            {isBackingUp && <RefreshCw className="w-4 h-4 text-blue-400 animate-spin" />}
+                            <tab.icon className={cn("w-4 h-4 transition-colors", activeTab === tab.id ? "text-blue-400" : "text-zinc-600 group-hover:text-zinc-400")} />
+                            {tab.label}
                         </button>
+                    ))}
+
+                    <div className="mt-auto p-2">
+                        <button
+                            onClick={onClose}
+                            className="w-full py-2.5 rounded-xl border border-white/5 text-zinc-500 hover:text-white hover:bg-white/5 transition-colors text-xs font-medium"
+                        >
+                            {t('cancel')}
+                        </button>
+                    </div>
+                </div>
+
+                {/* Content Area */}
+                <div className="flex-1 overflow-y-auto custom-scrollbar bg-black/10">
+                    <div className="p-8">
+                        <AnimatePresence mode="wait">
+                            <motion.div
+                                key={activeTab}
+                                initial={{ opacity: 0, x: 10 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: -10 }}
+                                transition={{ duration: 0.2 }}
+                            >
+                                {activeTab === 'privacy' && (
+                                    <div className="space-y-6">
+                                        <div className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5">
+                                            <div>
+                                                <h4 className="text-white font-medium">{t('defaultBlur')}</h4>
+                                                <p className="text-xs text-zinc-500 mt-1">{t('defaultBlurDesc')}</p>
+                                            </div>
+                                            <IOSSwitch checked={defaultBlurEnabled} onChange={setDefaultBlurEnabled} />
+                                        </div>
+                                    </div>
+                                )}
+
+                                {activeTab === 'backup' && (
+                                    <div className="space-y-6">
+                                        <div className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5">
+                                            <div>
+                                                <h4 className="text-white font-medium">{t('localBackup')}</h4>
+                                                <p className="text-xs text-zinc-500 mt-1">{t('localBackupDesc')}</p>
+                                            </div>
+                                            <IOSSwitch checked={backupEnabled} onChange={setBackupEnabled} />
+                                        </div>
+
+                                        <div className="pt-4 border-t border-white/5">
+                                            <h4 className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider px-1 mb-3">{t('dataManagement')}</h4>
+
+                                            {/* Grid for Actions */}
+                                            <div className="grid grid-cols-1 gap-3">
+                                                <button
+                                                    onClick={handleBackupAll}
+                                                    disabled={isBackingUp || IS_DEMO}
+                                                    className={cn(
+                                                        "w-full p-4 rounded-2xl border border-white/5 bg-white/5 flex items-center justify-between group transition-all text-sm",
+                                                        (isBackingUp || IS_DEMO) ? "opacity-50 cursor-not-allowed" : "hover:border-blue-500/30 hover:bg-blue-500/5"
+                                                    )}
+                                                >
+                                                    <div className="text-left flex items-center gap-3">
+                                                        <div className="p-2 bg-blue-500/10 rounded-xl">
+                                                            <Download className="w-5 h-5 text-blue-400" />
+                                                        </div>
+                                                        <div>
+                                                            <div className="text-white font-medium">
+                                                                {isBackingUp ? t('backingUp', { current: backupProgress.current, total: backupProgress.total }) : t('backupAll')}
+                                                            </div>
+                                                            <p className="text-[10px] text-zinc-500 mt-0.5">
+                                                                {t('backupAllDesc')}
+                                                                <span className="block opacity-60 mt-0.5">{t('systemDownloads')}</span>
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                    {isBackingUp && <RefreshCw className="w-4 h-4 text-blue-400 animate-spin" />}
+                                                </button>
+
+                                                <div className="grid grid-cols-2 gap-3">
+                                                    <button
+                                                        onClick={exportData}
+                                                        className="flex flex-col items-center justify-center gap-3 p-6 bg-white/5 border border-white/5 rounded-2xl hover:border-emerald-500/30 hover:bg-emerald-500/5 transition-all group"
+                                                    >
+                                                        <div className="p-3 bg-emerald-500/10 rounded-xl group-hover:scale-110 transition-transform">
+                                                            <Upload className="w-6 h-6 text-emerald-400" />
+                                                        </div>
+                                                        <span className="text-xs font-semibold text-zinc-300">{t('exportData')}</span>
+                                                    </button>
+
+                                                    <div className="relative group">
+                                                        <input
+                                                            type="file"
+                                                            accept=".json"
+                                                            onChange={importData}
+                                                            className="absolute inset-0 opacity-0 cursor-pointer z-10"
+                                                        />
+                                                        <div className="flex flex-col items-center justify-center gap-3 p-6 bg-white/5 border border-white/5 rounded-2xl group-hover:border-purple-500/30 group-hover:bg-purple-500/5 transition-all">
+                                                            <div className="p-3 bg-purple-500/10 rounded-xl group-hover:scale-110 transition-transform">
+                                                                <Download className="w-6 h-6 text-purple-400" />
+                                                            </div>
+                                                            <span className="text-xs font-semibold text-zinc-300">{t('importData')}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {activeTab === 'network' && (
+                                    <div className="space-y-6">
+                                        <div className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5">
+                                            <div>
+                                                <h4 className="text-white font-medium">{t('lanAccess')}</h4>
+                                                <p className="text-xs text-zinc-500 mt-1">{t('lanAccessDesc')}</p>
+                                            </div>
+                                            <IOSSwitch checked={lanAccessEnabled} onChange={setLanAccessEnabled} />
+                                        </div>
+
+                                        {lanAccessEnabled && (
+                                            <motion.div
+                                                initial={{ opacity: 0, y: 10 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                className="p-5 bg-blue-500/10 border border-blue-500/20 rounded-2xl flex flex-col gap-3"
+                                            >
+                                                <div className="flex items-center justify-between">
+                                                    <div className="flex items-center gap-2">
+                                                        <Globe className="w-4 h-4 text-blue-400" />
+                                                        <span className="text-xs text-blue-400 font-bold uppercase tracking-wider">{t('lanAddress')}</span>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center gap-2 p-3 bg-black/40 rounded-xl border border-white/5">
+                                                    <code className="flex-1 text-[13px] text-zinc-300 font-mono select-all truncate">
+                                                        {`http://${lanIp}:5179`}
+                                                    </code>
+                                                </div>
+                                                <p className="text-[10px] text-blue-400/60 leading-relaxed px-1">
+                                                    💡 在手機瀏覽器輸入此網址即可同步瀏覽，請確保裝置與本機處於同一 Wi-Fi。
+                                                </p>
+                                            </motion.div>
+                                        )}
+                                    </div>
+                                )}
+                            </motion.div>
+                        </AnimatePresence>
                     </div>
                 </div>
             </motion.div>
@@ -1797,8 +2086,8 @@ function NotificationToast({ notifications }) {
                         className={cn(
                             "px-4 py-3 rounded-xl shadow-2xl border backdrop-blur-md min-w-[220px] flex items-center gap-3 pointer-events-auto",
                             n.type === 'success' ? "bg-emerald-500/20 border-emerald-500/30 text-emerald-400" :
-                            n.type === 'warning' ? "bg-amber-500/20 border-amber-500/30 text-amber-400" :
-                            "bg-blue-500/20 border-blue-500/30 text-blue-400"
+                                n.type === 'warning' ? "bg-amber-500/20 border-amber-500/30 text-amber-400" :
+                                    "bg-blue-500/20 border-blue-500/30 text-blue-400"
                         )}
                     >
                         {n.type === 'success' && <Check className="w-4 h-4" />}
@@ -1831,6 +2120,92 @@ function AlertCircle(props) {
             <line x1="12" x2="12.01" y1="16" y2="16" />
         </svg>
     )
+}
+
+function LightboxOverlay({ id, links, onClose, onNavigate }) {
+    const currentIndex = links.findIndex(l => l.id === id);
+    const link = links[currentIndex];
+
+    // Keyboard navigation
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (e.key === 'Escape') onClose();
+            if (e.key === 'ArrowLeft') navigate(-1);
+            if (e.key === 'ArrowRight') navigate(1);
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [currentIndex, links.length]);
+
+    const navigate = (direction) => {
+        const nextIndex = (currentIndex + direction + links.length) % links.length;
+        onNavigate(links[nextIndex].id);
+    };
+
+    if (!link) return null;
+
+    return (
+        <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[500] bg-black/95 backdrop-blur-xl flex items-center justify-center select-none"
+            onClick={onClose}
+        >
+            {/* Top Bar */}
+            <div className="absolute top-0 inset-x-0 p-6 flex justify-between items-center z-10 bg-gradient-to-b from-black/60 to-transparent">
+                <div className="flex flex-col">
+                    <h3 className="text-white font-bold text-lg">{link.title}</h3>
+                    <p className="text-white/40 text-xs">{new Date(link.addedAt).toLocaleString()}</p>
+                </div>
+                <button
+                    onClick={onClose}
+                    className="p-3 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors"
+                >
+                    <X className="w-6 h-6" />
+                </button>
+            </div>
+
+            {/* Main Content Area */}
+            <div className="relative w-full h-full flex items-center justify-center p-4 md:p-12" onClick={e => e.stopPropagation()}>
+                <motion.img
+                    key={link.id}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                    src={link.thumbnail || link.url}
+                    alt={link.title}
+                    className="max-w-full max-h-full object-contain shadow-2xl rounded-lg"
+                />
+
+                {/* Navigation Arrows */}
+                <button
+                    onClick={() => navigate(-1)}
+                    className="absolute left-4 md:left-8 p-4 bg-white/5 hover:bg-white/10 rounded-full text-white/50 hover:text-white transition-all transform hover:scale-110"
+                >
+                    <ChevronLeft className="w-8 h-8" />
+                </button>
+                <button
+                    onClick={() => navigate(1)}
+                    className="absolute right-4 md:right-8 p-4 bg-white/5 hover:bg-white/10 rounded-full text-white/50 hover:text-white transition-all transform hover:scale-110"
+                >
+                    <ChevronRight className="w-8 h-8" />
+                </button>
+            </div>
+
+            {/* Bottom Bar / Prompt Area */}
+            <div className="absolute bottom-0 inset-x-0 p-8 flex flex-col items-center gap-4 bg-gradient-to-t from-black/60 to-transparent">
+                <div className="flex gap-2">
+                    {link.tags && link.tags.map(tag => (
+                        <span key={tag} className="px-3 py-1 bg-white/10 rounded-full text-[10px] text-white/60">
+                            #{tag}
+                        </span>
+                    ))}
+                </div>
+                {/* Future prompt display could go here */}
+            </div>
+        </motion.div>
+    );
 }
 
 function TagManagerModal({ onClose, allTags, globalRenameTag, globalDeleteTag, t }) {

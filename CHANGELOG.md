@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## [1.0.7] - 2026-01-24
+
+### Added
+- **Web App**: Fullscreen Lightbox mode with keyboard (Left/Right/Esc) and arrow navigation.
+- **Web App**: Reorganized card action buttons (Mini Preview on Left, Fullscreen in Middle, External Link on Right).
+
+### Fixed
+- **Web App**: Cleaned up redundant UI container syntax.
+
 ## [1.0.6] - 2026-01-23
 
 ### Added

@@ -1,9 +1,11 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import cors from 'cors';
+import axios from 'axios';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import os from 'os';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -23,7 +25,12 @@ if (!fs.existsSync(path.join(__dirname, 'data'))) {
 }
 
 if (!fs.existsSync(path.join(__dirname, 'data', 'thumbnails'))) {
-    fs.mkdirSync(path.join(__dirname, 'data', 'thumbnails'));
+    fs.mkdirSync(path.join(__dirname, 'data', 'thumbnails'), { recursive: true });
+}
+
+const PHOTOS_DIR = path.join(__dirname, 'data', 'thumbnails', 'VaultPhotos');
+if (!fs.existsSync(PHOTOS_DIR)) {
+    fs.mkdirSync(PHOTOS_DIR, { recursive: true });
 }
 
 if (!fs.existsSync(DATA_FILE)) {
@@ -73,6 +80,24 @@ migrateData();
 app.get('/api/links', (req, res) => {
     const data = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
     res.json(data);
+});
+
+app.get('/api/network-info', (req, res) => {
+    const interfaces = os.networkInterfaces();
+    let lanIp = 'localhost';
+
+    for (const name of Object.keys(interfaces)) {
+        for (const iface of interfaces[name]) {
+            // Skip internal (loopback) and non-IPv4 addresses
+            if (iface.family === 'IPv4' && !iface.internal) {
+                lanIp = iface.address;
+                break;
+            }
+        }
+        if (lanIp !== 'localhost') break;
+    }
+
+    res.json({ lanIp });
 });
 
 app.post('/api/links', (req, res) => {
@@ -251,8 +276,8 @@ app.post('/api/tags/delete', (req, res) => {
 
 // Local Thumbnail Backup logic
 const downloadImage = async (url, photoId) => {
-    const dest = path.join(__dirname, 'data', 'thumbnails', `${photoId}.jpg`);
-    if (fs.existsSync(dest)) return `/thumbnails/${photoId}.jpg`;
+    const dest = path.join(PHOTOS_DIR, `${photoId}.jpg`);
+    if (fs.existsSync(dest)) return `/thumbnails/VaultPhotos/${photoId}.jpg`;
 
     try {
         const response = await axios({
@@ -267,13 +292,37 @@ const downloadImage = async (url, photoId) => {
         });
 
         fs.writeFileSync(dest, Buffer.from(response.data));
-        console.log(`[Backup] Saved: ${photoId}.jpg`);
-        return `/thumbnails/${photoId}.jpg`;
+        console.log(`[Backup] Saved: VaultPhotos/${photoId}.jpg`);
+        return `/thumbnails/VaultPhotos/${photoId}.jpg`;
     } catch (err) {
         console.error(`[Backup] Error downloading ${url}:`, err.message);
         return null;
     }
 };
+
+app.get('/api/download-proxy', async (req, res) => {
+    const { url, filename } = req.query;
+    if (!url) return res.status(400).send('URL required');
+
+    try {
+        const response = await axios({
+            method: 'get',
+            url: url,
+            responseType: 'stream',
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
+                'Referer': 'https://grok.com/'
+            }
+        });
+
+        res.setHeader('Content-Disposition', `attachment; filename="${filename || 'image.jpg'}"`);
+        res.setHeader('Content-Type', response.headers['content-type'] || 'image/jpeg');
+        response.data.pipe(res);
+    } catch (err) {
+        console.error('[Proxy Download] Error:', err.message);
+        res.status(500).send('Failed to download image');
+    }
+});
 
 app.post('/api/backup-thumbnail', async (req, res) => {
     const { id, url } = req.body;
@@ -281,17 +330,23 @@ app.post('/api/backup-thumbnail', async (req, res) => {
 
     const localUrl = await downloadImage(url, id);
     if (localUrl) {
-        // Update local JSON
-        let data = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
-        data = data.map(link => link.id === id ? { ...link, thumbnail: localUrl } : link);
-        fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
-        res.json({ success: true, localUrl });
+        // Safe update pattern: Read fresh data right before atomic-like operation
+        try {
+            const raw = fs.readFileSync(DATA_FILE, 'utf8');
+            const data = JSON.parse(raw);
+            const updatedData = data.map(link => link.id === id ? { ...link, thumbnail: localUrl } : link);
+            fs.writeFileSync(DATA_FILE, JSON.stringify(updatedData, null, 2));
+            res.json({ success: true, localUrl });
+        } catch (err) {
+            console.error('[Backup] JSON Update Error:', err.message);
+            res.status(500).json({ error: 'Failed to update database' });
+        }
     } else {
         res.status(500).json({ error: 'Failed to download image' });
     }
 });
 
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server running on http://localhost:${PORT}`);
 });
