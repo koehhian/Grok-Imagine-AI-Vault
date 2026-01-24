@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
-import { Search, Plus, ExternalLink, RefreshCw, Trash2, Image as ImageIcon, Languages, Globe, Tag, Check, CheckSquare, X, ChevronDown, MoreHorizontal, Edit2, Download, Upload, ArrowUpDown, Settings, Maximize2, Maximize, ChevronLeft, ChevronRight, Play, Film, Shield, Database, Stars, Aperture } from 'lucide-react';
+import { Search, Plus, ExternalLink, RefreshCw, Trash2, Image as ImageIcon, Languages, Globe, Tag, Check, CheckSquare, X, ChevronDown, MoreHorizontal, Edit2, Download, Upload, ArrowUpDown, Settings, Maximize2, Maximize, ChevronLeft, ChevronRight, Play, Film, Shield, Database, Stars, Aperture, Pause } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -2125,6 +2125,19 @@ function AlertCircle(props) {
 function LightboxOverlay({ id, links, onClose, onNavigate }) {
     const currentIndex = links.findIndex(l => l.id === id);
     const link = links[currentIndex];
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [slideshowInterval, setSlideshowInterval] = useState(5);
+
+    // Slideshow logic
+    useEffect(() => {
+        let timer;
+        if (isPlaying) {
+            timer = setInterval(() => {
+                navigate(1);
+            }, slideshowInterval * 1000);
+        }
+        return () => clearInterval(timer);
+    }, [isPlaying, slideshowInterval, currentIndex, links.length]);
 
     // Keyboard navigation
     useEffect(() => {
@@ -2158,12 +2171,38 @@ function LightboxOverlay({ id, links, onClose, onNavigate }) {
                     <h3 className="text-white font-bold text-lg">{link.title}</h3>
                     <p className="text-white/40 text-xs">{new Date(link.addedAt).toLocaleString()}</p>
                 </div>
-                <button
-                    onClick={onClose}
-                    className="p-3 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors"
-                >
-                    <X className="w-6 h-6" />
-                </button>
+
+                <div className="flex items-center gap-4">
+                    <div className="flex items-center bg-white/10 rounded-full px-4 py-2 gap-3 border border-white/5">
+                        <button
+                            onClick={(e) => { e.stopPropagation(); setIsPlaying(!isPlaying); }}
+                            className="p-1 hover:text-blue-400 transition-colors text-white"
+                            title={isPlaying ? 'Pause' : 'Play'}
+                        >
+                            {isPlaying ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6 fill-current" />}
+                        </button>
+                        <div className="h-4 w-[1px] bg-white/20" />
+                        <div className="flex items-center gap-2">
+                            <input
+                                type="number"
+                                min="1"
+                                max="60"
+                                value={slideshowInterval}
+                                onChange={(e) => setSlideshowInterval(Math.max(1, Math.min(60, parseInt(e.target.value) || 1)))}
+                                className="w-10 bg-transparent text-white text-center text-sm font-bold focus:outline-none"
+                                onClick={(e) => e.stopPropagation()}
+                            />
+                            <span className="text-[10px] text-white/40 font-medium uppercase tracking-wider">sec</span>
+                        </div>
+                    </div>
+
+                    <button
+                        onClick={onClose}
+                        className="p-3 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors"
+                    >
+                        <X className="w-6 h-6" />
+                    </button>
+                </div>
             </div>
 
             {/* Main Content Area */}

@@ -28,6 +28,7 @@ An elegant management tool designed for [Grok.com](https://grok.com/imagine), al
 ## ✨ Key Features
 
 -   **Categorized Settings Menu**: A professional sidebar-based settings UI, organizing options into **Privacy**, **Backup**, and **Network** for a cleaner experience.
+-   **Fullscreen Experience & Slideshow**: High-performance lightbox with keyboard navigation and an **Auto-Play Slideshow** mode (customizable 1-60s interval).
 -   **Smart Information Extraction**: Automatically extracts the original Grok ID from dragged images or complex pasted data. **Duplicate links are automatically filtered** to keep your library clean.
 -   **Automatic Local Backup**: When the server is running, the system automatically downloads remote image thumbnails to your local cache, preventing link expiration.
 -   **Batch Download to System**: Download all your saved creations directly to your **System Default Downloads Folder** for easy access.
