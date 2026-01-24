@@ -69,8 +69,6 @@ An elegant management tool designed for [Grok.com](https://grok.com/imagine), al
 ---
 
 > **Not familiar with the Terminal?** Check out the [💻 Terminal Beginner Guide](terminal_newbie.md)
-
-> **Not familiar with the Terminal?** Check out the [💻 Terminal Beginner Guide](terminal_newbie.md)
 > **Need help installing the extension?** Check out the [🧩 Extension Installation Guide](extension_newbie.md)
 
 ## License

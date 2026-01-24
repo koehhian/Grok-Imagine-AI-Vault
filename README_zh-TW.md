@@ -69,8 +69,6 @@
 ---
 
 > **不懂如何使用終端機？** 請參考 [💻 終端機新手指南](terminal_newbie_zh-TW.md)
-
-> **不懂如何使用終端機？** 請參考 [💻 終端機新手指南](terminal_newbie_zh-TW.md)
 > **不懂如何安裝套件？** 請參考 [🧩 套件安裝新手指南](extension_newbie_zh-TW.md)
 
 ## 授權 (License)
