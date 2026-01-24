@@ -68,15 +68,7 @@ An elegant management tool designed for [Grok.com](https://grok.com/imagine), al
 
 ---
 
-## 📸 Media Production Guide
-
-To make your showcase posts pop, record these 4 key clips:
-1.  **The Smooth Workflow**: Drag a Grok image into the Vault and show it instantly appearing.
-2.  **The Lasso Drag**: Hold `Shift` and circle a group of images to show the cyan selection.
-3.  **Instant Capture**: Scroll the Grok gallery and show the counter in the helper panel going up.
-4.  **The Organized Vault**: A quick scroll of your finished, tagged gallery in the main web app.
-
----
+> **Not familiar with the Terminal?** Check out the [💻 Terminal Beginner Guide](terminal_newbie.md)
 
 > **Not familiar with the Terminal?** Check out the [💻 Terminal Beginner Guide](terminal_newbie.md)
 > **Need help installing the extension?** Check out the [🧩 Extension Installation Guide](extension_newbie.md)
