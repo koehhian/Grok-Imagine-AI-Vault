@@ -27,13 +27,34 @@ An elegant management tool designed for [Grok.com](https://grok.com/imagine), al
 
 ## ✨ Key Features
 
--   **Categorized Settings Menu**: A professional sidebar-based settings UI, organizing options into **Privacy**, **Backup**, and **Network** for a cleaner experience.
--   **Fullscreen Experience & Slideshow**: High-performance lightbox with keyboard navigation and an **Auto-Play Slideshow** mode (customizable 1-60s interval).
--   **Smart Information Extraction**: Automatically extracts the original Grok ID from dragged images or complex pasted data. **Duplicate links are automatically filtered** to keep your library clean.
--   **Automatic Local Backup**: When the server is running, the system automatically downloads remote image thumbnails to your local cache, preventing link expiration.
--   **Batch Download to System**: Download all your saved creations directly to your **System Default Downloads Folder** for easy access.
--   **Privacy & Aesthetics**: Features "Privacy Blur" mode, immersive Picture-in-Picture preview, and modern UI indicators (Stars/Aperture) for a premium look and feel.
--   **Vault Helper (Extension)**: Enhances your browsing with auto-detection, range export, lasso selection, and a "Batch Like" feature to preserve link persistence.
+### 🎨 Immersive User Interface
+- **Masonry Gallery**: Smooth, responsive waterfall layout for browsing AI creations.
+- **Fullscreen Slideshow**: Cinema-grade lightbox with **Auto-Play** mode and customizable transition intervals (1-60s).
+- **Dark Mode Aesthetic**: Deep zinc-themed interface for reduced eye strain and premium feel.
+- **macOS-style Fan-out UI**: Innovative "Derivative Fan-out" logic for viewing image variations and videos.
+- **Sparkles Indicator**: High-performance indicator for AI-generated variations.
+- **Categorized Settings Menu**: A professional sidebar-based settings UI (Privacy, Backup, Network).
+
+### 🛡️ Privacy & Reliability
+- **Privacy Blur Mode**: Immediate gallery obfuscation for screen sharing, with persistent "Default Blur" settings.
+- **Local Backup (Cache)**: Automatic downloading of thumbnails to local storage to prevent CDN link expiration.
+- **Advanced Security**: Enhanced exclusions to ensure personal databases are never uploaded to GitHub.
+
+### 🌐 Connectivity & Networking
+- **LAN Access Mode**: One-click toggle to allow other devices on the same Wi-Fi to visit the vault.
+- **Real-IP Detection**: Automatic detection of the server's local IP (e.g., `192.168.x.x`) for easy cross-device connection.
+
+### 🧩 Vault Helper (Chrome Extension)
+- **Auto-Capture**: iOS-style toggle to seamlessly intercept images while browsing Grok.com.
+- **Lasso Selection**: Fluid range selection tool for bulk managing images.
+- **"Batch Like" Feature**: One-click hearting of all detected images to ensure link longevity.
+
+### 📦 Data Management
+- **System Batch Download**: Serial downloading of all creations directly to your **System Downloads Folder**.
+- **JSON Import/Export**: Robust backup and restoration of the entire vault database.
+- **Duplicate Protection**: Intelligent deduplication during link additions.
+
+---
 
 ## 💡 Pro Tip: How to keep your images forever?
 

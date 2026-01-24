@@ -2192,7 +2192,7 @@ function LightboxOverlay({ id, links, onClose, onNavigate }) {
                                 className="w-10 bg-transparent text-white text-center text-sm font-bold focus:outline-none"
                                 onClick={(e) => e.stopPropagation()}
                             />
-                            <span className="text-[10px] text-white/40 font-medium uppercase tracking-wider">sec</span>
+                            <span className="text-[10px] text-white/40 font-medium uppercase tracking-wider">{language === 'en' ? 'sec' : '秒'}</span>
                         </div>
                     </div>
 
