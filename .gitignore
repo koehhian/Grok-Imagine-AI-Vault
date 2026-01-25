@@ -27,3 +27,14 @@ grok-extension/test-data/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# AI Agent Data (Personal)
+.agent/
+
+# Backup Files
+*.bak
+*.bak.*
+*.backup
+
+# Build Cache
+.vite/
